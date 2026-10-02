@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { updatePasswordAction, updatePersonalAction } from "@/app/actions/profile";
-import { Lock, User } from "lucide-react";
+import { Lock, User, Eye, EyeOff } from "lucide-react";
 
 const RANKS = [
   "01. CHIEF", "02. ASSISTANT CHIEF", "03. COMMANDER", "04. CAPTAIN",
@@ -14,10 +14,13 @@ const RANKS = [
 export default function ProfileClient({ session, officer }) {
   const [passState, passDispatch, passPending] = useActionState(updatePasswordAction, null);
   const [personalState, personalDispatch, personalPending] = useActionState(updatePersonalAction, null);
+  const passFormRef = useRef(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (passState?.success) {
       alert("Password berhasil diubah!");
+      passFormRef.current?.reset();
     }
   }, [passState]);
 
@@ -102,20 +105,31 @@ export default function ProfileClient({ session, officer }) {
           <h2 className="font-rajdhani text-xl font-bold text-white">Ubah Password</h2>
         </div>
         
-        <form action={passDispatch} className="space-y-4">
+        <form ref={passFormRef} action={passDispatch} className="space-y-4">
           <input type="hidden" name="user_id" value={session.id} />
           
           <div>
             <label className="label">Password Lama</label>
-            <input type="password" name="old_password" required className="field" placeholder="Ketik password lama..." />
+            <input type={showPassword ? "text" : "password"} name="old_password" required className="field" placeholder="Ketik password lama..." />
           </div>
           <div>
             <label className="label">Password Baru</label>
-            <input type="password" name="new_password" required className="field" placeholder="Ketik password baru..." />
+            <input type={showPassword ? "text" : "password"} name="new_password" required className="field" placeholder="Ketik password baru..." />
           </div>
           <div>
             <label className="label">Konfirmasi Password Baru</label>
-            <input type="password" name="confirm_password" required className="field" placeholder="Ketik ulang password baru..." />
+            <input type={showPassword ? "text" : "password"} name="confirm_password" required className="field" placeholder="Ketik ulang password baru..." />
+          </div>
+
+          <div className="flex justify-end pt-1">
+            <button 
+              type="button" 
+              onClick={() => setShowPassword(!showPassword)}
+              className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+            >
+              {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+              {showPassword ? "Sembunyikan" : "Lihat"} Password
+            </button>
           </div>
 
           {passState?.error && (

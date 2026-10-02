@@ -442,7 +442,7 @@ function HeroSection({ stats, pillars, contracts }) {
             <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300">
               Agensi penyedia personil kepolisisan profesional untuk server
               FiveM. Personil bersertifikat, radio etiquette teruji, dan siap
-              diterjunkan sesuai kebutuhan roleplay Amerika Anda.
+              diterjunkan sesuai kebutuhan Server Roleplay Anda.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -498,24 +498,24 @@ function HeroSection({ stats, pillars, contracts }) {
             const IconMap = { ShieldCheck, Target, Clock };
             const PillarIcon = IconMap[pillar.icon_name] ?? ShieldCheck;
             return (
-            <RevealItem key={pillar.title} className="h-full">
-              <article className="card h-full p-5">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex size-8 items-center justify-center rounded-md border border-pine-500/20 bg-pine-500/10">
-                    <PillarIcon
-                      className="size-4 text-pine-400"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </div>
-                <h3 className="mt-4 font-rajdhani text-lg font-bold text-white">
-                  {pillar.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-400">
-                  {pillar.description}
-                </p>
-              </article>
-            </RevealItem>
+              <RevealItem key={pillar.title} className="h-full">
+                <article className="card h-full p-5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex size-8 items-center justify-center rounded-md border border-pine-500/20 bg-pine-500/10">
+                      <PillarIcon
+                        className="size-4 text-pine-400"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </div>
+                  <h3 className="mt-4 font-rajdhani text-lg font-bold text-white">
+                    {pillar.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                    {pillar.description}
+                  </p>
+                </article>
+              </RevealItem>
             );
           })}
         </Reveal>
@@ -543,7 +543,7 @@ function ContractMarquee({ contracts }) {
           Dipercaya oleh server-server terbaik
         </p>
       </div>
-      
+
       {/* gradient masks for smooth edges */}
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 sm:w-32 bg-gradient-to-r from-[#080608] to-transparent"></div>
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 sm:w-32 bg-gradient-to-l from-[#080608] to-transparent"></div>
@@ -682,16 +682,16 @@ function RosterSection({ officers, divisions }) {
         officer.name.toLowerCase().includes(q) ||
         officer.callsign.toLowerCase().includes(q) ||
         officer.id.toLowerCase().includes(q);
-        
+
       const oDivs = officer.division ? officer.division.split(", ") : [];
       const filterMatch = filter === "All" || oDivs.includes(filter) || oDivs.includes("All Division");
-        
+
       return hit && filterMatch;
     });
   }, [query, filter, officersData]);
 
   const onDutyCount = officersData.filter((o) => o.status !== "Standby").length;
-  
+
   const divisionCount = [
     {
       division: "All Division",
@@ -707,7 +707,7 @@ function RosterSection({ officers, divisions }) {
         return oDivs.includes(d.name) || oDivs.includes("All Division");
       }).length,
     }))
-  ];  return (
+  ]; return (
     <section
       id="roster"
       className="relative overflow-hidden border-t border-line py-20 sm:py-28"
@@ -754,11 +754,10 @@ function RosterSection({ officers, divisions }) {
                     type="button"
                     onClick={() => setFilter(f)}
                     aria-pressed={filter === f}
-                    className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${
-                      filter === f
-                        ? "border-crimson-500/40 bg-crimson-500/15 text-white"
-                        : "border-line text-slate-400 hover:border-line-strong hover:text-white"
-                    }`}
+                    className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${filter === f
+                      ? "border-crimson-500/40 bg-crimson-500/15 text-white"
+                      : "border-line text-slate-400 hover:border-line-strong hover:text-white"
+                      }`}
                   >
                     {f}
                   </button>
@@ -865,58 +864,58 @@ function PricingSection({ contracts, pricing }) {
 
           <ul className="mt-5 grid gap-4 md:grid-cols-3">
             {activeContracts.map((contract) => {
-              const detailPoints = contract.detail 
-                ? contract.detail.split(/\n|(?=\b\d+\.\s)/).filter(p => p.trim() !== '') 
+              const detailPoints = contract.detail
+                ? contract.detail.split(/\n|(?=\b\d+\.\s)/).filter(p => p.trim() !== '')
                 : [];
               return (
-              <RevealItem key={contract.mou} as="li">
-                <div className="card h-full overflow-hidden flex flex-col">
-                  {contract.photo_url && (
-                    <div className="relative h-40 w-full border-b border-line bg-black/40">
-                      <Image
-                        src={contract.photo_url}
-                        alt={`Server ${contract.server}`}
-                        fill
-                        className="object-cover opacity-80"
-                      />
-                    </div>
-                  )}
-                  <div className="p-5 flex-1 flex flex-col">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-[11px] text-slate-500">
-                        {contract.mou}
-                      </span>
-                      <span
-                        className={`rounded border px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] ${
-                          contract.status === "Active"
+                <RevealItem key={contract.mou} as="li">
+                  <div className="card h-full overflow-hidden flex flex-col">
+                    {contract.photo_url && (
+                      <div className="relative h-40 w-full border-b border-line bg-black/40">
+                        <Image
+                          src={contract.photo_url}
+                          alt={`Server ${contract.server}`}
+                          fill
+                          className="object-cover opacity-80"
+                        />
+                      </div>
+                    )}
+                    <div className="p-5 flex-1 flex flex-col">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono text-[11px] text-slate-500">
+                          {contract.mou}
+                        </span>
+                        <span
+                          className={`rounded border px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] ${contract.status === "Active"
                             ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
                             : "border-amber-500/25 bg-amber-500/10 text-amber-400"
-                        }`}
-                      >
-                        {contract.status.toUpperCase()}
-                      </span>
-                    </div>
-                    <h4 className="mt-3 font-rajdhani text-lg font-bold text-white">
-                      {contract.server}
-                    </h4>
-                    <div className="mt-2 text-sm text-slate-400">
-                      {detailPoints.length > 0 ? (
-                        <ul className="space-y-1.5">
-                          {detailPoints.map((point, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <span className="mt-1.5 text-[6px] text-emerald-500">●</span>
-                              <span className="leading-relaxed">{point.trim().replace(/^-\s*/, '')}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p>-</p>
-                      )}
+                            }`}
+                        >
+                          {contract.status.toUpperCase()}
+                        </span>
+                      </div>
+                      <h4 className="mt-3 font-rajdhani text-lg font-bold text-white">
+                        {contract.server}
+                      </h4>
+                      <div className="mt-2 text-sm text-slate-400">
+                        {detailPoints.length > 0 ? (
+                          <ul className="space-y-1.5">
+                            {detailPoints.map((point, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="mt-1.5 text-[6px] text-emerald-500">●</span>
+                                <span className="leading-relaxed">{point.trim().replace(/^-\s*/, '')}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p>-</p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </RevealItem>
-            )})}
+                </RevealItem>
+              )
+            })}
           </ul>
         </Reveal>
 
@@ -925,73 +924,69 @@ function PricingSection({ contracts, pricing }) {
             const IconMap = { Shield, Crown, Target };
             const TierIcon = IconMap[tier.icon_name] ?? Shield;
             return (
-            <RevealItem key={tier.name} className="h-full">
-              <article
-                className={`card flex h-full flex-col p-6 sm:p-7 ${
-                  tier.popular ? "border-amber-500/35 bg-amber-500/[0.04]" : ""
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span
-                    className={`flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] ${
-                      tier.popular ? "text-amber-400" : "text-slate-400"
+              <RevealItem key={tier.name} className="h-full">
+                <article
+                  className={`card flex h-full flex-col p-6 sm:p-7 ${tier.popular ? "border-amber-500/35 bg-amber-500/[0.04]" : ""
                     }`}
-                  >
-                    <TierIcon
-                      className={`size-4 ${tier.popular ? "text-amber-400" : "text-pine-400"}`}
-                      aria-hidden="true"
-                    />
-                    {tier.tag}
-                  </span>
-                  {tier.popular && (
-                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] text-amber-300">
-                      POPULER
-                    </span>
-                  )}
-                </div>
-
-                <h3 className="mt-5 font-rajdhani text-2xl font-bold text-white">
-                  {tier.name}
-                </h3>
-                <p className="mt-2 flex items-baseline gap-1.5">
-                  <CountUp
-                    value={tier.price}
-                    decimals={tier.priceDecimals ?? 0}
-                    prefix="Rp "
-                    suffix={tier.priceSuffix}
-                    className="font-orbitron text-2xl font-bold text-white"
-                  />
-                  <span className="text-sm text-slate-500">{tier.period}</span>
-                </p>
-
-                <ul className="mt-6 flex-1 space-y-2.5">
-                  {tier.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-start gap-2.5 text-sm"
-                    >
-                      <Check
-                        className={`mt-0.5 size-4 flex-shrink-0 ${
-                          tier.popular ? "text-amber-400" : "text-pine-400"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] ${tier.popular ? "text-amber-400" : "text-slate-400"
                         }`}
+                    >
+                      <TierIcon
+                        className={`size-4 ${tier.popular ? "text-amber-400" : "text-pine-400"}`}
                         aria-hidden="true"
                       />
-                      <span className="text-slate-300">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                      {tier.tag}
+                    </span>
+                    {tier.popular && (
+                      <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] text-amber-300">
+                        POPULER
+                      </span>
+                    )}
+                  </div>
 
-                <a
-                  href="#kontak"
-                  className={`btn mt-7 w-full ${
-                    tier.popular ? "btn-warn" : "btn-primary"
-                  }`}
-                >
-                  {tier.cta}
-                  <ArrowUpRight className="size-4" />
-                </a>
-              </article>
-            </RevealItem>
+                  <h3 className="mt-5 font-rajdhani text-2xl font-bold text-white">
+                    {tier.name}
+                  </h3>
+                  <p className="mt-2 flex items-baseline gap-1.5">
+                    <CountUp
+                      value={tier.price}
+                      decimals={tier.priceDecimals ?? 0}
+                      prefix="Rp "
+                      suffix={tier.priceSuffix}
+                      className="font-orbitron text-2xl font-bold text-white"
+                    />
+                    <span className="text-sm text-slate-500">{tier.period}</span>
+                  </p>
+
+                  <ul className="mt-6 flex-1 space-y-2.5">
+                    {tier.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-start gap-2.5 text-sm"
+                      >
+                        <Check
+                          className={`mt-0.5 size-4 flex-shrink-0 ${tier.popular ? "text-amber-400" : "text-pine-400"
+                            }`}
+                          aria-hidden="true"
+                        />
+                        <span className="text-slate-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <a
+                    href="#kontak"
+                    className={`btn mt-7 w-full ${tier.popular ? "btn-warn" : "btn-primary"
+                      }`}
+                  >
+                    {tier.cta}
+                    <ArrowUpRight className="size-4" />
+                  </a>
+                </article>
+              </RevealItem>
             );
           })}
         </Reveal>
@@ -1139,11 +1134,10 @@ function ScriptsSection({ products }) {
               type="button"
               onClick={() => setFilter(c)}
               aria-pressed={filter === c}
-              className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${
-                filter === c
-                  ? "border-pine-500/40 bg-pine-500/15 text-white"
-                  : "border-line text-slate-400 hover:border-line-strong hover:text-white"
-              }`}
+              className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${filter === c
+                ? "border-pine-500/40 bg-pine-500/15 text-white"
+                : "border-line text-slate-400 hover:border-line-strong hover:text-white"
+                }`}
             >
               {c}
             </button>
@@ -1153,63 +1147,63 @@ function ScriptsSection({ products }) {
         <Reveal layout className="mt-10 grid gap-6 md:grid-cols-3">
           <AnimatePresence mode="popLayout">
             {filteredProducts.map((product) => {
-            const IconMap = { Code2, Shirt, Car };
-            const ProductIcon = IconMap[product.icon_name] ?? Code2;
-            return (
-            <RevealItem layout key={product.id} className="h-full">
-              <article className="card flex h-full flex-col p-6">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-slate-400">
-                    <ProductIcon
-                      className="size-4 text-pine-400"
-                      aria-hidden="true"
-                    />
-                    {product.category}
-                  </span>
-                  <span className="rounded border border-line bg-white/[0.03] px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] text-slate-300">
-                    {product.badge}
-                  </span>
-                </div>
+              const IconMap = { Code2, Shirt, Car };
+              const ProductIcon = IconMap[product.icon_name] ?? Code2;
+              return (
+                <RevealItem layout key={product.id} className="h-full">
+                  <article className="card flex h-full flex-col p-6">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-slate-400">
+                        <ProductIcon
+                          className="size-4 text-pine-400"
+                          aria-hidden="true"
+                        />
+                        {product.category}
+                      </span>
+                      <span className="rounded border border-line bg-white/[0.03] px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] text-slate-300">
+                        {product.badge}
+                      </span>
+                    </div>
 
-                <h3 className="mt-5 font-rajdhani text-xl font-bold text-white">
-                  {product.title}
-                </h3>
-                <p className="mt-2.5 text-sm leading-relaxed text-slate-400">
-                  {product.description}
-                </p>
+                    <h3 className="mt-5 font-rajdhani text-xl font-bold text-white">
+                      {product.title}
+                    </h3>
+                    <p className="mt-2.5 text-sm leading-relaxed text-slate-400">
+                      {product.description}
+                    </p>
 
-                <ul className="mt-6 flex-1 space-y-2">
-                  {product.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-center gap-2 text-sm text-slate-400"
-                    >
-                      <span className="size-1 flex-shrink-0 rounded-full bg-pine-400" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+                    <ul className="mt-6 flex-1 space-y-2">
+                      {product.features.map((feature) => (
+                        <li
+                          key={feature}
+                          className="flex items-center gap-2 text-sm text-slate-400"
+                        >
+                          <span className="size-1 flex-shrink-0 rounded-full bg-pine-400" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
 
-                <div className="mt-7 flex items-center justify-between gap-3 border-t border-line pt-5">
-                  <CountUp
-                    value={product.price}
-                    prefix="Rp "
-                    suffix={product.priceSuffix}
-                    className="flex items-center gap-1.5 font-orbitron text-lg font-bold text-white"
-                  />
-                  <a
-                    href="#kontak"
-                    aria-label={`Tanya ${product.title} ke COP-S`}
-                    className="btn btn-ghost btn-sm"
-                  >
-                    <Tag className="size-3.5 text-pine-400" aria-hidden="true" />
-                    Tanya
-                  </a>
-                </div>
-              </article>
-            </RevealItem>
-            );
-          })}
+                    <div className="mt-7 flex items-center justify-between gap-3 border-t border-line pt-5">
+                      <CountUp
+                        value={product.price}
+                        prefix="Rp "
+                        suffix={product.priceSuffix}
+                        className="flex items-center gap-1.5 font-orbitron text-lg font-bold text-white"
+                      />
+                      <a
+                        href="#kontak"
+                        aria-label={`Tanya ${product.title} ke COP-S`}
+                        className="btn btn-ghost btn-sm"
+                      >
+                        <Tag className="size-3.5 text-pine-400" aria-hidden="true" />
+                        Tanya
+                      </a>
+                    </div>
+                  </article>
+                </RevealItem>
+              );
+            })}
           </AnimatePresence>
         </Reveal>
 
@@ -1337,9 +1331,8 @@ function SectionHead({ index, label, title, lede }) {
       <TypeTitle
         as="h2"
         text={title}
-        className={`font-orbitron text-2xl font-bold text-white sm:text-3xl ${
-          index || label ? "mt-4" : ""
-        }`}
+        className={`font-orbitron text-2xl font-bold text-white sm:text-3xl ${index || label ? "mt-4" : ""
+          }`}
       />
       <p className="mt-4 text-base leading-relaxed text-slate-400">{lede}</p>
     </div>
@@ -1449,18 +1442,16 @@ function OfficerCard({ officer }) {
           {officer.id}
         </span>
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] ${
-            statusTone[officer.status]
-          }`}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] ${statusTone[officer.status]
+            }`}
         >
           <span
-            className={`size-1 rounded-full ${
-              officer.status === "Active"
-                ? "bg-emerald-400"
-                : officer.status === "On-Duty"
-                  ? "bg-pine-400"
-                  : "bg-amber-400"
-            }`}
+            className={`size-1 rounded-full ${officer.status === "Active"
+              ? "bg-emerald-400"
+              : officer.status === "On-Duty"
+                ? "bg-pine-400"
+                : "bg-amber-400"
+              }`}
           />
           {officer.status.toUpperCase()}
         </span>
@@ -1491,9 +1482,8 @@ function OfficerCard({ officer }) {
         ].map(([key, value], i, rows) => (
           <div
             key={key}
-            className={`flex items-center justify-between py-2 ${
-              i < rows.length - 1 ? "border-b border-line" : ""
-            }`}
+            className={`flex items-center justify-between py-2 ${i < rows.length - 1 ? "border-b border-line" : ""
+              }`}
           >
             <dt className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
               {key}

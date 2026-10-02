@@ -173,7 +173,7 @@ const ContractSchema = z.object({
   mou_code: z.string().min(3),
   server_name: z.string().min(3),
   status: z.enum(["Active", "Pending", "Expired", "Terminated"]),
-  detail: z.string().min(5),
+  detail: z.string().optional(),
   personnel_count: z.coerce.number().int().min(1).optional(),
   signed_at: z.string().optional(),
   photo_url: z.string().optional(),

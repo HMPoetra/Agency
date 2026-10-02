@@ -5,20 +5,30 @@ import { updateManualTimeAction } from "@/app/actions/admin";
 
 export default function HoursTableClient({ officers, isAdmin }) {
   const [editingId, setEditingId] = useState(null);
-  const [manualHours, setManualHours] = useState("");
-  const [manualMinutes, setManualMinutes] = useState("");
+  const [operation, setOperation] = useState("add"); // "add" or "sub"
+  const [inputHours, setInputHours] = useState("");
+  const [inputMinutes, setInputMinutes] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleEdit = (officer) => {
     setEditingId(officer.id);
-    const totalMinutes = parseInt(officer.manual_minutes || 0, 10);
-    setManualHours(Math.floor(totalMinutes / 60));
-    setManualMinutes(totalMinutes % 60);
+    setOperation("add");
+    setInputHours("");
+    setInputMinutes("");
   };
 
-  const handleSave = async (id) => {
+  const handleSave = async (id, currentManualMinutes) => {
     setLoading(true);
-    const res = await updateManualTimeAction(id, manualHours, manualMinutes);
+    let delta = (parseInt(inputHours || 0, 10) * 60) + parseInt(inputMinutes || 0, 10);
+    if (operation === "sub") delta = -delta;
+    
+    let newTotal = currentManualMinutes + delta;
+    if (newTotal < 0) newTotal = 0; // Jangan sampai minus
+    
+    const newH = Math.floor(newTotal / 60);
+    const newM = newTotal % 60;
+
+    const res = await updateManualTimeAction(id, newH, newM);
     setLoading(false);
     if (res?.error) {
       alert(res.error);
@@ -67,11 +77,20 @@ export default function HoursTableClient({ officers, isAdmin }) {
                   <td className="p-3">
                     {editingId === o.id ? (
                       <div className="flex items-center gap-2">
+                        <select
+                          className="field py-1 px-2 h-8 w-14 bg-black/40 text-center cursor-pointer"
+                          value={operation}
+                          onChange={(e) => setOperation(e.target.value)}
+                          disabled={loading}
+                        >
+                          <option value="add">+</option>
+                          <option value="sub">-</option>
+                        </select>
                         <input
                           type="number"
                           className="field py-1 px-2 h-8 w-16 text-center"
-                          value={manualHours}
-                          onChange={(e) => setManualHours(e.target.value)}
+                          value={inputHours}
+                          onChange={(e) => setInputHours(e.target.value)}
                           disabled={loading}
                           placeholder="Jam"
                         />
@@ -79,8 +98,8 @@ export default function HoursTableClient({ officers, isAdmin }) {
                         <input
                           type="number"
                           className="field py-1 px-2 h-8 w-16 text-center"
-                          value={manualMinutes}
-                          onChange={(e) => setManualMinutes(e.target.value)}
+                          value={inputMinutes}
+                          onChange={(e) => setInputMinutes(e.target.value)}
                           disabled={loading}
                           placeholder="Menit"
                         />
@@ -103,7 +122,7 @@ export default function HoursTableClient({ officers, isAdmin }) {
                             Batal
                           </button>
                           <button
-                            onClick={() => handleSave(o.id)}
+                            onClick={() => handleSave(o.id, manualMin)}
                             className="btn btn-primary btn-sm"
                             disabled={loading}
                           >
@@ -115,7 +134,7 @@ export default function HoursTableClient({ officers, isAdmin }) {
                           onClick={() => handleEdit(o)}
                           className="text-xs text-crimson-400 hover:text-crimson-300 underline"
                         >
-                          Edit Jam Manual
+                          Kalkulasi Waktu
                         </button>
                       )}
                     </td>

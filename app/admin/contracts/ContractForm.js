@@ -72,7 +72,7 @@ export default function ContractForm({ contract, mode }) {
               </div>
               <div>
                 <label className="label">Detail Kontrak</label>
-                <textarea name="detail" className="field min-h-[80px]" placeholder="Full Precinct Deployment - 15 Personil 24/7" defaultValue={contract?.detail} required />
+                <textarea name="detail" className="field min-h-[80px]" placeholder="Full Precinct Deployment - 15 Personil 24/7" defaultValue={contract?.detail} />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
