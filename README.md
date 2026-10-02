@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# COP-S (Cops On Supply)
 
-## Getting Started
+COP-S (Cops On Supply) adalah agensi penyedia personil kepolisian elit dan aset digital untuk server roleplay FiveM. Kami mengatasi masalah roleplay yang timpang melalui SOP ketat, patroli 24/7, serta unit taktis khusus. Platform ini dilengkapi dashboard admin canggih untuk mengelola roster, kontrak MOU, absensi, hingga rating kepuasan klien.
 
-First, run the development server:
+## 🌟 Fitur Utama
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. Landing Page Dinamis
+- **Hero & Statistik**: Menampilkan jumlah personil aktif, server partner, dan total jam terbang roleplay (terkalkulasi otomatis dari database).
+- **Roster Explorer**: Mesin pencari personil berdasarkan divisi, pangkat, atau nama dengan UI/UX ala intelijen.
+- **Marquee Kontrak**: Menampilkan logo server partner secara interaktif.
+- **Katalog Aset & Harga**: Daftar paket langganan personil serta skrip/aset custom (MDT, EUP, Vehicle Handling).
+- **Review Inbox**: Formulir interaktif bagi klien untuk mengirimkan rating (bintang) dan pesan.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Admin Dashboard (CMS)
+- **Personil & Divisi**: Manajemen penuh data anggota (Pangkat, Callsign, Status, Divisi).
+- **Absensi Terintegrasi**: Sistem *clock-in/clock-out* otomatis serta input jam manual untuk menghitung jam terbang anggota.
+- **Kemitraan (Kontrak & Harga)**: Mengelola server klien yang menyewa jasa COP-S beserta penetapan harga per tier.
+- **Toko Aset (Script & Assets)**: Menambahkan skrip/aset dengan dukungan multi-foto (Carousel) dan link video.
+- **Manajemen Ulasan**: Mengontrol testimoni mana yang ditayangkan ke halaman utama.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
+- **Framework**: Next.js 16 (App Router) / React 19
+- **Styling**: Tailwind CSS v4, Framer Motion (Animations), Lucide (Icons)
+- **Database**: PostgreSQL (Neon Serverless)
+- **Authentication**: JWT (JSON Web Tokens)
+- **Validation**: Zod
+- **Notifications**: Sonner (Toasts)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Cara Menjalankan (Local Development)
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Clone repositori ini.
+2. Install semua dependencies:
+   ```bash
+   npm install
+   ```
+3. Buat file `.env` di *root directory* dan masukkan *Connection String* Neon PostgreSQL Anda:
+   ```env
+   DATABASE_URL="postgresql://user:password@endpoint.neon.tech/dbname?sslmode=require"
+   JWT_SECRET="rahasia-token-anda"
+   ```
+4. Setup Database (Jalankan migrasi tabel):
+   ```bash
+   npm run db:setup
+   ```
+5. Jalankan server *development*:
+   ```bash
+   npm run dev
+   ```
+6. Buka `http://localhost:3000` di browser Anda. (Akses Admin: `http://localhost:3000/admin` dengan default username `admin`).
