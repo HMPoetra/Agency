@@ -40,7 +40,9 @@ export default async function ContractsPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {pricingTiers.map((pricing) => (
+          {pricingTiers.map((pricing) => {
+            const features = Array.isArray(pricing.features) ? pricing.features : JSON.parse(pricing.features || "[]");
+            return (
             <div key={pricing.id} className="card flex flex-col p-5">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-mono text-[11px] text-slate-500">{pricing.tag || "REGULAR"}</span>
@@ -51,17 +53,28 @@ export default async function ContractsPage() {
                 )}
               </div>
               <h3 className="mt-3 font-rajdhani text-lg font-bold text-white">{pricing.name}</h3>
-              <p className="mt-1 flex-1 text-2xl font-bold text-crimson-400">
+              <p className="mt-1 text-2xl font-bold text-crimson-400">
                 {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(pricing.price_idr)}
                 <span className="text-sm text-slate-500 font-normal">/{pricing.billing_period}</span>
               </p>
               
-              <div className="mt-4 flex gap-2 border-t border-line pt-4">
+              {features.length > 0 && (
+                <ul className="mt-4 space-y-2 flex-1">
+                  {features.map((feature, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                      <span className="mt-0.5 text-crimson-500">▹</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              
+              <div className={features.length > 0 ? "mt-4 flex gap-2 border-t border-line pt-4" : "mt-4 flex gap-2 border-t border-line pt-4 flex-1 items-end"}>
                 <PricingForm pricing={pricing} mode="edit" />
                 <DeleteButton action={deletePricingAction.bind(null, pricing.id)} itemName="Paket Harga" />
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </section>
 
@@ -77,7 +90,9 @@ export default async function ContractsPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {contracts.map((contract) => (
+          {contracts.map((contract) => {
+            const detailPoints = contract.detail ? contract.detail.split('\n').filter(p => p.trim() !== '') : [];
+            return (
             <div key={contract.id} className="card flex flex-col p-5">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-mono text-[11px] text-slate-500">{contract.mou_code}</span>
@@ -86,7 +101,22 @@ export default async function ContractsPage() {
                 </span>
               </div>
               <h3 className="mt-3 font-rajdhani text-lg font-bold text-white">{contract.server_name}</h3>
-              <p className="mt-1 flex-1 text-sm text-slate-400">{contract.detail}</p>
+              
+              <div className="mt-3 mb-2 flex-1">
+                {detailPoints.length > 0 ? (
+                  <ul className="space-y-1.5">
+                    {detailPoints.map((point, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-slate-400">
+                        <span className="mt-1.5 text-[6px] text-crimson-500">●</span>
+                        <span className="leading-relaxed">{point.trim().replace(/^- /, '')}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-slate-400">-</p>
+                )}
+              </div>
+
               {contract.personnel_count && (
                 <p className="mt-2 text-xs text-slate-500">👥 {contract.personnel_count} personil</p>
               )}
@@ -100,7 +130,7 @@ export default async function ContractsPage() {
                 <DeleteButton action={deleteContractAction.bind(null, contract.id)} itemName="Kontrak MOU" />
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </section>
     </div>

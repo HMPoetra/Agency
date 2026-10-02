@@ -113,6 +113,15 @@ export default function PricingForm({ pricing, mode = "create" }) {
                     <input type="number" name="sort_order" className="field" defaultValue={pricing?.sort_order || 0} />
                   </div>
                 </div>
+                <div>
+                  <label className="label">Fitur / Poin Paket (Satu per baris)</label>
+                  <textarea 
+                    name="features" 
+                    className="field min-h-[100px]" 
+                    defaultValue={pricing?.features ? (Array.isArray(pricing.features) ? pricing.features : JSON.parse(pricing.features || "[]")).join("\n") : ""} 
+                    placeholder="24/7 Patrol&#10;Dedicated Channel&#10;VIP Support" 
+                  />
+                </div>
                 <div className="flex items-center gap-2 pt-2">
                   <input 
                     type="checkbox" 

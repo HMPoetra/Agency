@@ -100,6 +100,7 @@ export async function createOfficerAction(prevState, formData) {
   await requireAdmin();
   const payload = Object.fromEntries(formData);
   payload.rank = formData.getAll("rank").join(", ");
+  payload.division = formData.getAll("division").join(", ");
   const parsed = OfficerSchema.omit({ id: true }).safeParse(payload);
   if (!parsed.success) {
     return { error: parsed.error.errors[0].message };
@@ -132,6 +133,7 @@ export async function updateOfficerAction(id, prevState, formData) {
   await requireAdmin();
   const payload = Object.fromEntries(formData);
   payload.rank = formData.getAll("rank").join(", ");
+  payload.division = formData.getAll("division").join(", ");
   const parsed = OfficerSchema.omit({ id: true }).safeParse(payload);
   if (!parsed.success) return { error: parsed.error.errors[0].message };
   try {
@@ -193,7 +195,7 @@ export async function createContractAction(prevState, formData) {
 
 export async function updateContractAction(id, prevState, formData) {
   await requireAdmin();
-  const parsed = ContractSchema.omit({ mou_code: true }).safeParse(Object.fromEntries(formData));
+  const parsed = ContractSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0].message };
   try {
     await updateContract(id, parsed.data);
@@ -216,6 +218,9 @@ export async function createPricingAction(prevState, formData) {
   await requireAdmin();
   const name = formData.get("name");
   const price_idr = parseInt(formData.get("price_idr")) || 0;
+  const featuresStr = formData.get("features");
+  const features = featuresStr ? featuresStr.split('\n').map(f => f.trim()).filter(Boolean) : [];
+
   if (!name) return { error: "Nama paket wajib diisi." };
   try {
     await createPricingTier({
@@ -226,7 +231,8 @@ export async function createPricingAction(prevState, formData) {
       billing_period: formData.get("billing_period") || "Bulan",
       is_popular: formData.get("is_popular") === "on",
       cta_label: formData.get("cta_label") || "Pesan Sekarang",
-      sort_order: parseInt(formData.get("sort_order")) || 0
+      sort_order: parseInt(formData.get("sort_order")) || 0,
+      features
     });
     revalidatePath("/admin/contracts");
     revalidatePath("/");
@@ -240,6 +246,9 @@ export async function updatePricingAction(id, prevState, formData) {
   await requireAdmin();
   const name = formData.get("name");
   const price_idr = parseInt(formData.get("price_idr")) || 0;
+  const featuresStr = formData.get("features");
+  const features = featuresStr ? featuresStr.split('\n').map(f => f.trim()).filter(Boolean) : [];
+
   if (!name) return { error: "Nama paket wajib diisi." };
   try {
     await updatePricingTier(id, {
@@ -250,7 +259,8 @@ export async function updatePricingAction(id, prevState, formData) {
       billing_period: formData.get("billing_period") || "Bulan",
       is_popular: formData.get("is_popular") === "on",
       cta_label: formData.get("cta_label") || "Pesan Sekarang",
-      sort_order: parseInt(formData.get("sort_order")) || 0
+      sort_order: parseInt(formData.get("sort_order")) || 0,
+      features
     });
     revalidatePath("/admin/contracts");
     revalidatePath("/");

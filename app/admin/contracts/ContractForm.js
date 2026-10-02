@@ -56,12 +56,10 @@ export default function ContractForm({ contract, mode }) {
             </div>
 
             <form action={dispatch} className="space-y-4">
-              {mode === "create" && (
-                <div>
-                  <label className="label">Kode MOU</label>
-                  <input name="mou_code" className="field" placeholder="MOU-2024-004" required />
-                </div>
-              )}
+              <div>
+                <label className="label">Kode MOU</label>
+                <input name="mou_code" className="field" placeholder="MOU-2026-004" defaultValue={contract?.mou_code} required />
+              </div>
               <div>
                 <label className="label">Nama Server</label>
                 <input name="server_name" className="field" placeholder="Liberty City RP" defaultValue={contract?.server_name} required />

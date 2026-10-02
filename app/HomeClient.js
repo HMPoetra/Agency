@@ -682,7 +682,11 @@ function RosterSection({ officers, divisions }) {
         officer.name.toLowerCase().includes(q) ||
         officer.callsign.toLowerCase().includes(q) ||
         officer.id.toLowerCase().includes(q);
-      return hit && (filter === "All" || officer.division === filter || officer.division === "All Division");
+        
+      const oDivs = officer.division ? officer.division.split(", ") : [];
+      const filterMatch = filter === "All" || oDivs.includes(filter) || oDivs.includes("All Division");
+        
+      return hit && filterMatch;
     });
   }, [query, filter, officersData]);
 
@@ -691,11 +695,17 @@ function RosterSection({ officers, divisions }) {
   const divisionCount = [
     {
       division: "All Division",
-      count: officersData.filter((o) => o.division === "All Division").length,
+      count: officersData.filter((o) => {
+        const oDivs = o.division ? o.division.split(", ") : [];
+        return oDivs.includes("All Division");
+      }).length,
     },
     ...divs.map((d) => ({
       division: d.name,
-      count: officersData.filter((o) => o.division === d.name || o.division === "All Division").length,
+      count: officersData.filter((o) => {
+        const oDivs = o.division ? o.division.split(", ") : [];
+        return oDivs.includes(d.name) || oDivs.includes("All Division");
+      }).length,
     }))
   ];  return (
     <section
@@ -854,7 +864,11 @@ function PricingSection({ contracts, pricing }) {
           </div>
 
           <ul className="mt-5 grid gap-4 md:grid-cols-3">
-            {activeContracts.map((contract) => (
+            {activeContracts.map((contract) => {
+              const detailPoints = contract.detail 
+                ? contract.detail.split(/\n|(?=\b\d+\.\s)/).filter(p => p.trim() !== '') 
+                : [];
+              return (
               <RevealItem key={contract.mou} as="li">
                 <div className="card h-full overflow-hidden flex flex-col">
                   {contract.photo_url && (
@@ -885,13 +899,24 @@ function PricingSection({ contracts, pricing }) {
                     <h4 className="mt-3 font-rajdhani text-lg font-bold text-white">
                       {contract.server}
                     </h4>
-                    <p className="mt-1 text-sm text-slate-400">
-                      {contract.detail}
-                    </p>
+                    <div className="mt-2 text-sm text-slate-400">
+                      {detailPoints.length > 0 ? (
+                        <ul className="space-y-1.5">
+                          {detailPoints.map((point, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="mt-1.5 text-[6px] text-emerald-500">●</span>
+                              <span className="leading-relaxed">{point.trim().replace(/^-\s*/, '')}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>-</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </RevealItem>
-            ))}
+            )})}
           </ul>
         </Reveal>
 
@@ -934,7 +959,7 @@ function PricingSection({ contracts, pricing }) {
                     decimals={tier.priceDecimals ?? 0}
                     prefix="Rp "
                     suffix={tier.priceSuffix}
-                    className="font-orbitron text-3xl font-bold text-white"
+                    className="font-orbitron text-2xl font-bold text-white"
                   />
                   <span className="text-sm text-slate-500">{tier.period}</span>
                 </p>
@@ -1080,6 +1105,14 @@ function MouCta() {
 
 function ScriptsSection({ products }) {
   const productsList = products ?? [];
+  const [filter, setFilter] = useState("All");
+
+  const categories = ["All", ...Array.from(new Set(productsList.map(p => p.category)))];
+
+  const filteredProducts = useMemo(() => {
+    return productsList.filter(p => filter === "All" || p.category === filter);
+  }, [filter, productsList]);
+
   return (
     <section
       id="scripts"
@@ -1095,12 +1128,35 @@ function ScriptsSection({ products }) {
           />
         </div>
 
-        <Reveal className="mt-12 grid gap-6 md:grid-cols-3">
-          {productsList.map((product) => {
+        <div
+          className="mt-8 flex flex-wrap gap-2"
+          role="group"
+          aria-label="Filter kategori"
+        >
+          {categories.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setFilter(c)}
+              aria-pressed={filter === c}
+              className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${
+                filter === c
+                  ? "border-pine-500/40 bg-pine-500/15 text-white"
+                  : "border-line text-slate-400 hover:border-line-strong hover:text-white"
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+
+        <Reveal layout className="mt-10 grid gap-6 md:grid-cols-3">
+          <AnimatePresence mode="popLayout">
+            {filteredProducts.map((product) => {
             const IconMap = { Code2, Shirt, Car };
             const ProductIcon = IconMap[product.icon_name] ?? Code2;
             return (
-            <RevealItem key={product.id} className="h-full">
+            <RevealItem layout key={product.id} className="h-full">
               <article className="card flex h-full flex-col p-6">
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-slate-400">
@@ -1154,6 +1210,7 @@ function ScriptsSection({ products }) {
             </RevealItem>
             );
           })}
+          </AnimatePresence>
         </Reveal>
 
         <RevealItem className="mt-6">
@@ -1430,7 +1487,6 @@ function OfficerCard({ officer }) {
           ["Pangkat", officer.rank],
           ["Divisi", officer.division],
           ["JK", officer.gender],
-          ["Tugas", officer.unitTask],
           ["Keterangan", officer.notes],
         ].map(([key, value], i, rows) => (
           <div

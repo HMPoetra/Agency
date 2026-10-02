@@ -20,10 +20,6 @@ const GENDERS = ["Laki-laki", "Perempuan", "Lainnya"];
 export default function OfficerForm({ officer, divisions, ranks, mode }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [customRanks, setCustomRanks] = useState([]);
-  const [newRank, setNewRank] = useState("");
-  const [customDivisions, setCustomDivisions] = useState([]);
-  const [newDivision, setNewDivision] = useState("");
 
   const activeRanks = ranks ? ranks.map(r => r.name) : DEFAULT_RANKS;
 
@@ -42,26 +38,14 @@ export default function OfficerForm({ officer, divisions, ranks, mode }) {
     if (state?.success && open) {
       toast.success(mode === "edit" ? "Data personil berhasil diperbarui!" : "Data personil berhasil ditambahkan!");
       setOpen(false);
-      setCustomRanks([]);
-      setCustomDivisions([]);
     } else if (state?.error && open) {
       toast.error(state.error);
     }
   }, [state, open, mode]);
 
-  const handleAddRank = () => {
-    if (newRank && !activeRanks.includes(newRank) && !customRanks.includes(newRank)) {
-      setCustomRanks([...customRanks, newRank]);
-    }
-    setNewRank("");
-  };
 
-  const handleAddDivision = () => {
-    if (newDivision && !customDivisions.includes(newDivision)) {
-      setCustomDivisions([...customDivisions, newDivision]);
-    }
-    setNewDivision("");
-  };
+
+
 
   return (
     <>
@@ -94,57 +78,10 @@ export default function OfficerForm({ officer, divisions, ranks, mode }) {
                 <label className="label">Nama Lengkap</label>
                 <input name="full_name" className="field" placeholder='Alex Reyes' defaultValue={officer?.full_name} required />
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-3">
                 <div>
                   <label className="label">Callsign</label>
                   <input name="callsign" className="field" placeholder="1-ALPHA-05" defaultValue={officer?.callsign} required />
-                </div>
-                <div>
-                  <label className="label">Pangkat</label>
-                  <select name="rank" multiple className="field min-h-[120px]" defaultValue={officer?.rank ? officer.rank.split(", ") : []} required>
-                    {[...activeRanks, ...customRanks].map((r) => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                  <div className="mt-2 flex gap-2">
-                    <input 
-                      type="text" 
-                      className="field h-8 text-xs flex-1" 
-                      placeholder="Tambah pangkat baru..." 
-                      value={newRank}
-                      onChange={(e) => setNewRank(e.target.value)}
-                      onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddRank(); } }}
-                    />
-                    <button type="button" onClick={handleAddRank} className="btn btn-ghost btn-sm h-8 px-2 text-slate-400">
-                      <Plus className="size-3" />
-                    </button>
-                  </div>
-                  <p className="mt-1 text-[10px] text-slate-500">Tahan Ctrl/Cmd untuk memilih lebih dari 1</p>
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="label">Divisi</label>
-                  <select name="division" className="field" defaultValue={officer?.division || "All Division"} required>
-                    <option value="All Division">All Division</option>
-                    {divisions?.map(d => (
-                      <option key={d.id} value={d.name || d.id}>{d.name || d.id}</option>
-                    ))}
-                    {customDivisions.map((d) => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                  <div className="mt-2 flex gap-2">
-                    <input 
-                      type="text" 
-                      className="field h-8 text-xs flex-1" 
-                      placeholder="Tambah divisi baru..." 
-                      value={newDivision}
-                      onChange={(e) => setNewDivision(e.target.value)}
-                      onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); handleAddDivision(); } }}
-                    />
-                    <button type="button" onClick={handleAddDivision} className="btn btn-ghost btn-sm h-8 px-2 text-slate-400">
-                      <Plus className="size-3" />
-                    </button>
-                  </div>
                 </div>
                 <div>
                   <label className="label">Status</label>
@@ -152,17 +89,31 @@ export default function OfficerForm({ officer, divisions, ranks, mode }) {
                     {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="label">Jenis Kelamin</label>
                   <select name="gender" className="field" defaultValue={officer?.gender ?? "Laki-laki"} required>
                     {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
                   </select>
                 </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="label">Tugas Unit</label>
-                  <input name="unit_task" type="text" className="field" placeholder="Patrol, Sniper..." defaultValue={officer?.unit_task} required />
+                  <label className="label">Pangkat</label>
+                  <select name="rank" multiple className="field min-h-[120px]" defaultValue={officer?.rank ? officer.rank.split(", ") : []} required>
+                    {[...activeRanks].map((r) => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                  <p className="mt-1 text-[10px] text-slate-500">Tahan Ctrl/Cmd untuk memilih lebih dari 1</p>
+                </div>
+                <div>
+                  <label className="label">Divisi</label>
+                  <select name="division" multiple className="field min-h-[120px]" defaultValue={officer?.division ? officer.division.split(", ") : ["All Division"]} required>
+                    <option value="All Division">All Division</option>
+                    {divisions?.filter(d => (d.name || d.id) !== "All Division").map(d => (
+                      <option key={d.id} value={d.name || d.id}>{d.name || d.id}</option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-[10px] text-slate-500">Tahan Ctrl/Cmd untuk memilih lebih dari 1</p>
                 </div>
               </div>
               <div>
