@@ -8,7 +8,7 @@ export const metadata = { title: "Data Absensi — Admin COP-S" };
 
 export default async function AttendancePage() {
   const [records, allOfficers] = await Promise.all([
-    getAttendance({ limit: 100 }),
+    getAttendance({ limit: 1000 }),
     getOfficersWithHours()
   ]);
 

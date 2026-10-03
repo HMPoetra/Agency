@@ -15,6 +15,7 @@ import {
   createProduct, updateProduct, deleteProduct,
   updateReview, deleteReview, toggleReviewPublish
 } from "@/lib/queries";
+import { processImageUrl } from "@/lib/upload";
 
 /* ═══════════════════════════
    RANKS & DIVISIONS
@@ -45,9 +46,13 @@ export async function createDivisionAction(prevState, formData) {
   const description = formData.get("description");
   const photo_url = formData.get("photo_url");
   const is_visible_on_dashboard = formData.get("is_visible_on_dashboard") === "on";
+  
+  let processed_photo_url = photo_url;
+  if (photo_url) processed_photo_url = await processImageUrl(photo_url);
+
   if (!name || name.length < 2) return { error: "Nama divisi minimal 2 karakter." };
   try {
-    await createDivision({ name, tag, description, photo_url, is_visible_on_dashboard });
+    await createDivision({ name, tag, description, photo_url: processed_photo_url, is_visible_on_dashboard });
     revalidatePath("/admin/officers");
     revalidatePath("/admin/divisions");
     return { success: true };
@@ -63,9 +68,13 @@ export async function updateDivisionAction(id, prevState, formData) {
   const description = formData.get("description");
   const photo_url = formData.get("photo_url");
   const is_visible_on_dashboard = formData.get("is_visible_on_dashboard") === "on";
+  
+  let processed_photo_url = photo_url;
+  if (photo_url) processed_photo_url = await processImageUrl(photo_url);
+
   if (!name || name.length < 2) return { error: "Nama divisi minimal 2 karakter." };
   try {
-    await updateDivision(id, { name, tag, description, photo_url, is_visible_on_dashboard });
+    await updateDivision(id, { name, tag, description, photo_url: processed_photo_url, is_visible_on_dashboard });
     revalidatePath("/admin/officers");
     revalidatePath("/admin/divisions");
     return { success: true };
@@ -184,7 +193,11 @@ export async function createContractAction(prevState, formData) {
   const parsed = ContractSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0].message };
   try {
-    await createContract(parsed.data);
+    const data = { ...parsed.data };
+    if (data.photo_url) {
+      data.photo_url = await processImageUrl(data.photo_url);
+    }
+    await createContract(data);
     revalidatePath("/admin/contracts");
     revalidatePath("/");
     return { success: true };
@@ -198,7 +211,11 @@ export async function updateContractAction(id, prevState, formData) {
   const parsed = ContractSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0].message };
   try {
-    await updateContract(id, parsed.data);
+    const data = { ...parsed.data };
+    if (data.photo_url) {
+      data.photo_url = await processImageUrl(data.photo_url);
+    }
+    await updateContract(id, data);
     revalidatePath("/admin/contracts");
     revalidatePath("/");
     return { success: true };
@@ -313,7 +330,14 @@ export async function createProductAction(prevState, formData) {
     data.features = data.features ? data.features.split("\n").map(f => f.trim()).filter(Boolean) : [];
     
     // Process photo urls
-    data.photo_urls = data.photo_urls ? JSON.stringify(data.photo_urls.split("\n").map(u => u.trim()).filter(Boolean)) : '[]';
+    let urls = [];
+    if (data.photo_urls) {
+      const rawUrls = data.photo_urls.split("\n").map(u => u.trim()).filter(Boolean);
+      for (const u of rawUrls) {
+        urls.push(await processImageUrl(u));
+      }
+    }
+    data.photo_urls = JSON.stringify(urls);
     
     await createProduct(data);
     revalidatePath("/admin/products");
@@ -346,7 +370,14 @@ export async function updateProductAction(id, prevState, formData) {
     data.features = data.features ? data.features.split("\n").map(f => f.trim()).filter(Boolean) : [];
     
     // Process photo urls
-    data.photo_urls = data.photo_urls ? JSON.stringify(data.photo_urls.split("\n").map(u => u.trim()).filter(Boolean)) : '[]';
+    let urls = [];
+    if (data.photo_urls) {
+      const rawUrls = data.photo_urls.split("\n").map(u => u.trim()).filter(Boolean);
+      for (const u of rawUrls) {
+        urls.push(await processImageUrl(u));
+      }
+    }
+    data.photo_urls = JSON.stringify(urls);
     
     await updateProduct(id, data);
     revalidatePath("/admin/products");

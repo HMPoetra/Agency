@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { createDivisionAction, updateDivisionAction } from "@/app/actions/admin";
 import { Plus, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
+import ImageUpload from "@/app/components/ImageUpload";
 
 export default function DivisionForm({ division, mode }) {
   const [open, setOpen] = useState(false);
@@ -65,11 +66,7 @@ export default function DivisionForm({ division, mode }) {
                 </div>
               </div>
               
-              <div>
-                <label className="label">URL Foto / Logo (Opsional)</label>
-                <input name="photo_url" className="field" placeholder='https://...' defaultValue={division?.photo_url} />
-                <p className="text-[10px] text-slate-500 mt-1">Masukkan link gambar untuk ditampilkan sebagai cover divisi.</p>
-              </div>
+              <ImageUpload name="photo_url" defaultValue={division?.photo_url} label="URL Foto / Logo (Opsional)" />
 
               <div>
                 <label className="label">Deskripsi</label>

@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { createContractAction, updateContractAction } from "@/app/actions/admin";
 import { Plus, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
+import ImageUpload from "@/app/components/ImageUpload";
 
 const STATUSES = ["Active", "Pending", "Expired", "Terminated"];
 
@@ -89,16 +90,7 @@ export default function ContractForm({ contract, mode }) {
                   />
                 </div>
               </div>
-              <div>
-                <label className="label">URL Foto Server (Opsional)</label>
-                <input 
-                  name="photo_url" 
-                  type="url" 
-                  className="field" 
-                  placeholder="https://..." 
-                  defaultValue={contract?.photo_url || ""} 
-                />
-              </div>
+              <ImageUpload name="photo_url" defaultValue={contract?.photo_url || ""} label="URL Foto Server (Opsional)" />
 
               {state?.error && <p className="text-sm text-crimson-400">{state.error}</p>}
 

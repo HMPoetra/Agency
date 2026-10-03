@@ -8,14 +8,49 @@ import { updateAttendanceAction, deleteAttendanceAction } from "@/app/actions/ad
 export default function AttendanceClient({ initialRecords }) {
   const [records, setRecords] = useState(initialRecords);
   const [editingRec, setEditingRec] = useState(null);
+  
+  // Set default filter date to today (local time)
+  const [filterDate, setFilterDate] = useState(() => {
+    const d = new Date();
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  });
 
   // Sync with prop
   useEffect(() => {
     setRecords(initialRecords);
   }, [initialRecords]);
 
+  // Filter records based on selected date
+  const filteredRecords = filterDate
+    ? records.filter((rec) => {
+        const d = new Date(rec.checked_in_at);
+        const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+        return localDate === filterDate;
+      })
+    : records;
+
   return (
     <div className="card overflow-hidden">
+      <div className="flex items-center justify-between p-4 border-b border-line">
+        <h2 className="font-rajdhani text-lg font-bold text-white">Laporan Duty</h2>
+        <div className="flex items-center gap-3">
+          <label className="text-xs text-slate-400 uppercase tracking-widest">Filter Tanggal:</label>
+          <input
+            type="date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="field w-auto text-sm"
+          />
+          {filterDate && (
+            <button 
+              onClick={() => setFilterDate("")}
+              className="text-xs text-crimson-400 hover:text-crimson-300"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -26,7 +61,7 @@ export default function AttendanceClient({ initialRecords }) {
             </tr>
           </thead>
           <tbody>
-            {records.map((rec) => (
+            {filteredRecords.map((rec) => (
               <tr key={rec.id} className="border-b border-line/50 last:border-0 hover:bg-white/[0.015] transition-colors">
                 <td className="px-4 py-3 text-slate-200 font-medium">{rec.full_name}</td>
                 <td className="px-4 py-3 font-mono text-xs text-slate-400">{rec.callsign}</td>
@@ -76,10 +111,10 @@ export default function AttendanceClient({ initialRecords }) {
                 </td>
               </tr>
             ))}
-            {records.length === 0 && (
+            {filteredRecords.length === 0 && (
               <tr>
                 <td colSpan={9} className="px-4 py-8 text-center text-slate-500">
-                  Belum ada data absensi.
+                  Belum ada data absensi untuk periode ini.
                 </td>
               </tr>
             )}
