@@ -28,7 +28,8 @@ export default function DivisionForm({ division, mode }) {
     } else if (state?.error && open) {
       toast.error(state.error);
     }
-  }, [state, open, mode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   return (
     <>
@@ -54,7 +55,7 @@ export default function DivisionForm({ division, mode }) {
               </button>
             </div>
 
-            <form action={dispatch} className="space-y-4">
+            <form action={dispatch} className="space-y-4" encType="multipart/form-data">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="label">Nama Divisi</label>

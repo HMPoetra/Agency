@@ -9,7 +9,7 @@ import {
   createOfficer, updateOfficer, deleteOfficer, updateOfficerManualMinutes,
   createContract, updateContract, deleteContract,
   createUser, deleteUser,
-  updateAttendance, deleteAttendance,
+  updateAttendance, deleteAttendance, getAttendance,
   createRank, deleteRank, createDivision, updateDivision, deleteDivision,
   createPricingTier, updatePricingTier, deletePricingTier,
   createProduct, updateProduct, deleteProduct,
@@ -458,6 +458,16 @@ export async function deleteAttendanceAction(id) {
   await deleteAttendance(id);
   revalidatePath("/admin/attendance");
   revalidatePath("/absensi");
+}
+
+export async function getOfficerAttendanceAction(officerId) {
+  await requireAdmin();
+  try {
+    const records = await getAttendance({ officerId, limit: 1000 });
+    return { success: true, data: records };
+  } catch (e) {
+    return { error: e.message };
+  }
 }
 
 /* ═══════════════════════════

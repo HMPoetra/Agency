@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { updateManualTimeAction } from "@/app/actions/admin";
+import Link from "next/link";
+
+const DAYS = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
 export default function HoursTableClient({ officers, isAdmin }) {
   const [editingId, setEditingId] = useState(null);
@@ -130,12 +133,20 @@ export default function HoursTableClient({ officers, isAdmin }) {
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => handleEdit(o)}
-                          className="text-xs text-crimson-400 hover:text-crimson-300 underline"
-                        >
-                          Kalkulasi Waktu
-                        </button>
+                        <div className="flex justify-end gap-3 items-center">
+                          <Link
+                            href={`/admin/attendance/${o.id}`}
+                            className="text-xs text-emerald-400 hover:text-emerald-300 underline"
+                          >
+                            Detail Absensi
+                          </Link>
+                          <button
+                            onClick={() => handleEdit(o)}
+                            className="text-xs text-crimson-400 hover:text-crimson-300 underline"
+                          >
+                            Kalkulasi Waktu
+                          </button>
+                        </div>
                       )}
                     </td>
                   )}
@@ -145,6 +156,7 @@ export default function HoursTableClient({ officers, isAdmin }) {
           </tbody>
         </table>
       </div>
+      
     </div>
   );
 }

@@ -29,7 +29,8 @@ export default function ContractForm({ contract, mode }) {
     } else if (state?.error && open) {
       toast.error(state.error);
     }
-  }, [state, open, mode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   return (
     <>
@@ -56,7 +57,7 @@ export default function ContractForm({ contract, mode }) {
               </button>
             </div>
 
-            <form action={dispatch} className="space-y-4">
+            <form action={dispatch} className="space-y-4" encType="multipart/form-data">
               <div>
                 <label className="label">Kode MOU</label>
                 <input name="mou_code" className="field" placeholder="MOU-2026-004" defaultValue={contract?.mou_code} required />
