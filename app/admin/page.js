@@ -119,11 +119,11 @@ export default async function AdminDashboard() {
                     <td className="px-4 py-3 font-mono text-xs text-slate-400">{rec.callsign}</td>
                     <td className="px-4 py-3 text-slate-400">{rec.division}</td>
                     <td className="px-4 py-3 font-mono text-crimson-400">
-                      {new Date(rec.checked_in_at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                      {new Date(rec.checked_in_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" })} WIB
                     </td>
                     <td className="px-4 py-3 font-mono text-slate-400">
                       {rec.checked_out_at
-                        ? new Date(rec.checked_out_at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+                        ? new Date(rec.checked_out_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" }) + " WIB"
                         : "—"}
                     </td>
                     <td className="px-4 py-3">

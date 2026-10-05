@@ -29,8 +29,8 @@ export default function AttendanceClient({ todayRecord, officerId }) {
           </span>
         </p>
         <p className="mt-1 text-sm text-slate-500">
-          Check-in: {new Date(todayRecord.checked_in_at).toLocaleTimeString("id-ID")} &middot;{" "}
-          Check-out: {new Date(todayRecord.checked_out_at).toLocaleTimeString("id-ID")}
+          Check-in: {new Date(todayRecord.checked_in_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta" })} WIB &middot;{" "}
+          Check-out: {new Date(todayRecord.checked_out_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta" })} WIB
         </p>
       </div>
     );
@@ -46,7 +46,7 @@ export default function AttendanceClient({ todayRecord, officerId }) {
         <p className="mt-2 text-slate-400">
           Check-in:{" "}
           <span className="font-mono text-crimson-400">
-            {new Date(todayRecord.checked_in_at).toLocaleTimeString("id-ID")}
+            {new Date(todayRecord.checked_in_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta" })} WIB
           </span>
         </p>
         <form
