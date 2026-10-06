@@ -125,12 +125,12 @@ export default function OfficerAttendanceClient({ officer, initialRecords }) {
                         <Fragment key={i}>
                           <td className="px-3 py-2 border-r border-line text-emerald-400 bg-emerald-900/5 align-top">
                             {recs.map((r, idx) => (
-                              <div key={idx} className="my-1">{new Date(r.checked_in_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour:"2-digit", minute:"2-digit" })} WIB</div>
+                              <div key={idx} className="my-1">{new Date(r.checked_in_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour:"2-digit", minute:"2-digit", hour12: false })} WIB</div>
                             ))}
                           </td>
                           <td className="px-3 py-2 border-r border-line last:border-r-0 text-slate-500 bg-red-900/5 align-top">
                             {recs.map((r, idx) => (
-                              <div key={idx} className="my-1">{r.checked_out_at ? new Date(r.checked_out_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour:"2-digit", minute:"2-digit" }) + " WIB" : "-"}</div>
+                              <div key={idx} className="my-1">{r.checked_out_at ? new Date(r.checked_out_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour:"2-digit", minute:"2-digit", hour12: false }) + " WIB" : "-"}</div>
                             ))}
                           </td>
                         </Fragment>

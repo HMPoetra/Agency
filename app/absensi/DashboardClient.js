@@ -42,7 +42,7 @@ export default function DashboardClient({ officer, history, todayRecord }) {
   const dateNum = now.getDate();
   const monthName = MONTHS[now.getMonth()];
   const yearNum = now.getFullYear();
-  const timeString = now.toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour12: false }) + " WIB";
+  const timeString = now.toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour12: false }) + " WIB";
   const weekOfMonth = Math.ceil(dateNum / 7);
 
   // Dynamic columns for table
@@ -193,7 +193,7 @@ export default function DashboardClient({ officer, history, todayRecord }) {
             </div>
             <h2 className="font-rajdhani text-xl font-bold text-white">Sedang Bertugas</h2>
             <p className="mt-2 text-sm text-slate-400">
-              Check-in: <span className="font-mono text-crimson-400">{new Date(todayRecord.checked_in_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta" })} WIB</span>
+              Check-in: <span className="font-mono text-crimson-400">{new Date(todayRecord.checked_in_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour12: false })} WIB</span>
             </p>
             <form action={() => checkOutAction(todayRecord.id)} className="mt-6">
               <button type="submit" className="btn btn-danger w-full">
@@ -322,12 +322,12 @@ export default function DashboardClient({ officer, history, todayRecord }) {
                           <Fragment key={i}>
                             <td className="px-3 py-2 border-r border-line text-emerald-400 bg-emerald-900/5 align-top">
                               {recs.map((r, idx) => (
-                                <div key={idx} className="my-1">{new Date(r.checked_in_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour:"2-digit", minute:"2-digit" })} WIB</div>
+                                <div key={idx} className="my-1">{new Date(r.checked_in_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour:"2-digit", minute:"2-digit", hour12: false })} WIB</div>
                               ))}
                             </td>
                             <td className="px-3 py-2 border-r border-line last:border-r-0 text-slate-500 bg-red-900/5 align-top">
                               {recs.map((r, idx) => (
-                                <div key={idx} className="my-1">{r.checked_out_at ? new Date(r.checked_out_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour:"2-digit", minute:"2-digit" }) + " WIB" : "-"}</div>
+                                <div key={idx} className="my-1">{r.checked_out_at ? new Date(r.checked_out_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour:"2-digit", minute:"2-digit", hour12: false }) + " WIB" : "-"}</div>
                               ))}
                             </td>
                           </Fragment>

@@ -120,11 +120,11 @@ export default async function AdminDashboard() {
                     <td className="px-4 py-3 font-mono text-xs text-slate-400">{rec.callsign}</td>
                     <td className="px-4 py-3 text-slate-400">{rec.division}</td>
                     <td className="px-4 py-3 font-mono text-crimson-400 whitespace-nowrap">
-                      {new Date(rec.checked_in_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} {new Date(rec.checked_in_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" })} WIB
+                      {new Date(rec.checked_in_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} {new Date(rec.checked_in_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false })} WIB
                     </td>
                     <td className="px-4 py-3 font-mono text-slate-400 whitespace-nowrap">
                       {rec.checked_out_at
-                        ? `${new Date(rec.checked_out_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} ${new Date(rec.checked_out_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" })} WIB`
+                        ? `${new Date(rec.checked_out_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} ${new Date(rec.checked_out_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false })} WIB`
                         : "—"}
                     </td>
                     <td className="px-4 py-3">

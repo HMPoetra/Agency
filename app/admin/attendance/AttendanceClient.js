@@ -83,10 +83,10 @@ export default function AttendanceClient({ initialRecords, officers }) {
                   })}
                 </td>
                 <td className="px-4 py-3 font-mono text-emerald-400">
-                  {new Date(rec.checked_in_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta" })} WIB
+                  {new Date(rec.checked_in_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour12: false })} WIB
                 </td>
                 <td className="px-4 py-3 font-mono text-crimson-400">
-                  {rec.checked_out_at ? new Date(rec.checked_out_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta" }) + " WIB" : "-"}
+                  {rec.checked_out_at ? new Date(rec.checked_out_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour12: false }) + " WIB" : "-"}
                 </td>
                 <td className="px-4 py-3 font-mono text-slate-300">
                   {rec.duration_minutes ? `${Math.floor(rec.duration_minutes / 60)}j ${Math.floor(rec.duration_minutes % 60)}m` : "-"}
