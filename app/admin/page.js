@@ -10,7 +10,7 @@ export default async function AdminDashboard() {
   const [session, summary, recentAttendance] = await Promise.all([
     getSession(),
     getDashboardSummary(),
-    getAttendance({ limit: 5 }),
+    getAttendance({ limit: 100, todayOnly: true }),
   ]);
 
   const o = summary.officers;
@@ -40,11 +40,11 @@ export default async function AdminDashboard() {
       color: "emerald",
     },
     {
-      label: "Standby",
-      value: o.standby,
-      sub: "personil standby",
-      icon: Shield,
-      color: "slate",
+      label: "On-Duty",
+      value: a.active_now,
+      sub: "personil sedang bertugas",
+      icon: CheckCircle,
+      color: "blue",
     },
   ];
 
@@ -53,6 +53,7 @@ export default async function AdminDashboard() {
     amber:   "border-amber-500/25 bg-amber-500/10 text-amber-400",
     emerald: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
     slate:   "border-slate-500/25 bg-slate-500/10 text-slate-400",
+    blue:    "border-blue-500/25 bg-blue-500/10 text-blue-400",
   };
 
   return (
@@ -118,12 +119,12 @@ export default async function AdminDashboard() {
                     <td className="px-4 py-3 text-slate-200">{rec.full_name}</td>
                     <td className="px-4 py-3 font-mono text-xs text-slate-400">{rec.callsign}</td>
                     <td className="px-4 py-3 text-slate-400">{rec.division}</td>
-                    <td className="px-4 py-3 font-mono text-crimson-400">
-                      {new Date(rec.checked_in_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" })} WIB
+                    <td className="px-4 py-3 font-mono text-crimson-400 whitespace-nowrap">
+                      {new Date(rec.checked_in_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} {new Date(rec.checked_in_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" })} WIB
                     </td>
-                    <td className="px-4 py-3 font-mono text-slate-400">
+                    <td className="px-4 py-3 font-mono text-slate-400 whitespace-nowrap">
                       {rec.checked_out_at
-                        ? new Date(rec.checked_out_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" }) + " WIB"
+                        ? `${new Date(rec.checked_out_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} ${new Date(rec.checked_out_at).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" })} WIB`
                         : "—"}
                     </td>
                     <td className="px-4 py-3">

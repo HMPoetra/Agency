@@ -47,7 +47,7 @@ export default async function AttendancePage() {
           </div>
         </div>
 
-        <AttendanceClient initialRecords={records} />
+        <AttendanceClient initialRecords={records} officers={allOfficers} />
       </div>
 
       <HoursTableClient officers={allOfficers} isAdmin={true} />

@@ -116,7 +116,8 @@ export default function DashboardClient({ officer, history, todayRecord }) {
 
   if (periodFilter === "all" && officer?.manual_minutes) {
     const manMins = parseInt(officer.manual_minutes, 10) || 0;
-    const totalMins = (h * 60) + m + manMins;
+    let totalMins = (h * 60) + m + manMins;
+    if (totalMins < 0) totalMins = 0;
     h = Math.floor(totalMins / 60);
     m = totalMins % 60;
   }

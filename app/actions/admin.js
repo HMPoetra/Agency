@@ -9,7 +9,7 @@ import {
   createOfficer, updateOfficer, deleteOfficer, updateOfficerManualMinutes,
   createContract, updateContract, deleteContract,
   createUser, deleteUser,
-  updateAttendance, deleteAttendance, getAttendance,
+  updateAttendance, deleteAttendance, getAttendance, createManualAttendance,
   createRank, deleteRank, createDivision, updateDivision, deleteDivision,
   createPricingTier, updatePricingTier, deletePricingTier,
   createProduct, updateProduct, deleteProduct,
@@ -447,6 +447,24 @@ export async function updateAttendanceAction(prevState, formData) {
     await updateAttendance(id, data);
     revalidatePath("/admin/attendance");
     revalidatePath("/absensi"); // also revalidate officer absensi
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+export async function createManualAttendanceAction(prevState, formData) {
+  await requireAdmin();
+  const data = {
+    officer_id: formData.get("officer_id"),
+    checked_in_at: formData.get("checked_in_at"),
+    checked_out_at: formData.get("checked_out_at") || null,
+    note: formData.get("note") || "Manual Entry by Admin",
+  };
+  try {
+    await createManualAttendance(data);
+    revalidatePath("/admin/attendance");
+    revalidatePath("/absensi");
     return { success: true };
   } catch (e) {
     return { error: e.message };

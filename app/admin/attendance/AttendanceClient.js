@@ -3,11 +3,12 @@
 import { useState, useActionState, useEffect } from "react";
 import { Edit2, Trash2, X, Plus } from "lucide-react";
 import { createPortal } from "react-dom";
-import { updateAttendanceAction, deleteAttendanceAction } from "@/app/actions/admin";
+import { updateAttendanceAction, deleteAttendanceAction, createManualAttendanceAction } from "@/app/actions/admin";
 
-export default function AttendanceClient({ initialRecords }) {
+export default function AttendanceClient({ initialRecords, officers }) {
   const [records, setRecords] = useState(initialRecords);
   const [editingRec, setEditingRec] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
   
   // Set default filter date to today (local time)
   const [filterDate, setFilterDate] = useState(() => {
@@ -34,6 +35,14 @@ export default function AttendanceClient({ initialRecords }) {
       <div className="flex items-center justify-between p-4 border-b border-line">
         <h2 className="font-rajdhani text-lg font-bold text-white">Laporan Duty</h2>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsAdding(true)}
+            className="btn btn-primary btn-sm flex items-center gap-1 mr-4"
+          >
+            <Plus className="size-4" />
+            Tambah Manual
+          </button>
+          
           <label className="text-xs text-slate-400 uppercase tracking-widest">Filter Tanggal:</label>
           <input
             type="date"
@@ -125,6 +134,9 @@ export default function AttendanceClient({ initialRecords }) {
       {editingRec && (
         <AttendanceModal rec={editingRec} onClose={() => setEditingRec(null)} />
       )}
+      {isAdding && (
+        <AddAttendanceModal officers={officers} onClose={() => setIsAdding(false)} />
+      )}
     </div>
   );
 }
@@ -188,6 +200,113 @@ function AttendanceModal({ rec, onClose }) {
           <div className="pt-2">
             <button type="submit" disabled={isPending} className="btn btn-primary w-full">
               {isPending ? "Menyimpan..." : "Simpan Perubahan"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  return typeof document !== "undefined" ? createPortal(content, document.body) : null;
+}
+
+function AddAttendanceModal({ officers, onClose }) {
+  const [state, formAction, isPending] = useActionState(createManualAttendanceAction, null);
+  const [checkInTime, setCheckInTime] = useState("");
+  const [checkOutTime, setCheckOutTime] = useState("");
+
+  useEffect(() => {
+    if (state?.success) {
+      alert("Berhasil menambahkan absensi manual!");
+      onClose();
+    }
+  }, [state, onClose]);
+
+  const setTimeToNow = (setter) => {
+    const d = new Date();
+    setter(new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 19));
+  };
+
+  const content = (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      
+      <div className="card relative w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
+        <button onClick={onClose} className="absolute right-4 top-4 text-slate-400 hover:text-white">
+          <X className="size-5" />
+        </button>
+        
+        <h2 className="mb-6 font-rajdhani text-2xl font-bold text-white">Tambah Absensi Manual</h2>
+        
+        <form action={formAction} className="space-y-4">
+          <div>
+            <label className="label">Pilih Personil</label>
+            <select name="officer_id" className="field" required>
+              <option value="">-- Pilih Personil --</option>
+              {officers?.map(o => (
+                <option key={o.id} value={o.id}>{o.callsign} - {o.full_name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="label !mb-0">Check-In</label>
+              <button 
+                type="button" 
+                onClick={() => setTimeToNow(setCheckInTime)}
+                className="text-[10px] uppercase tracking-wider text-crimson-400 hover:text-crimson-300 font-mono"
+              >
+                Set Sekarang
+              </button>
+            </div>
+            <input 
+              type="datetime-local" 
+              step="1"
+              name="checked_in_at" 
+              className="field" 
+              value={checkInTime}
+              onChange={(e) => setCheckInTime(e.target.value)}
+              required 
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="label !mb-0">Check-Out (Opsional)</label>
+              <button 
+                type="button" 
+                onClick={() => setTimeToNow(setCheckOutTime)}
+                className="text-[10px] uppercase tracking-wider text-crimson-400 hover:text-crimson-300 font-mono"
+              >
+                Set Sekarang
+              </button>
+            </div>
+            <input 
+              type="datetime-local" 
+              step="1"
+              name="checked_out_at" 
+              className="field" 
+              value={checkOutTime}
+              onChange={(e) => setCheckOutTime(e.target.value)}
+            />
+          </div>
+          
+          <div>
+            <label className="label">Catatan</label>
+            <input 
+              type="text" 
+              name="note" 
+              className="field" 
+              placeholder="Misal: Lupa check-in / Backdate" 
+            />
+          </div>
+
+          {state?.error && <p className="text-sm text-crimson-400">{state.error}</p>}
+          
+          <div className="pt-2">
+            <button type="submit" disabled={isPending} className="btn btn-primary w-full">
+              {isPending ? "Menyimpan..." : "Tambahkan Data"}
             </button>
           </div>
         </form>

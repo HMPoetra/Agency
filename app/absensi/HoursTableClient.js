@@ -20,16 +20,22 @@ export default function HoursTableClient({ officers, isAdmin }) {
     setInputMinutes("");
   };
 
-  const handleSave = async (id, currentManualMinutes) => {
+  const handleSave = async (id, currentManualMinutes, systemMinutes) => {
     setLoading(true);
     let delta = (parseInt(inputHours || 0, 10) * 60) + parseInt(inputMinutes || 0, 10);
     if (operation === "sub") delta = -delta;
     
     let newTotal = currentManualMinutes + delta;
-    if (newTotal < 0) newTotal = 0; // Jangan sampai minus
     
-    const newH = Math.floor(newTotal / 60);
-    const newM = newTotal % 60;
+    // Jangan sampai total keseluruhan (sistem + manual) menjadi minus
+    if (systemMinutes + newTotal < 0) {
+      newTotal = -systemMinutes;
+    }
+    
+    const isNeg = newTotal < 0;
+    const absTotal = Math.abs(newTotal);
+    const newH = (isNeg ? -1 : 1) * Math.floor(absTotal / 60);
+    const newM = (isNeg ? -1 : 1) * (absTotal % 60);
 
     const res = await updateManualTimeAction(id, newH, newM);
     setLoading(false);
@@ -61,21 +67,24 @@ export default function HoursTableClient({ officers, isAdmin }) {
               const manualMin = parseInt(o.manual_minutes || 0, 10);
               const totalMins = systemMinutes + manualMin;
               
-              const systemH = Math.floor(systemMinutes / 60);
-              const systemM = systemMinutes % 60;
-              
-              const manH = Math.floor(manualMin / 60);
-              const manM = manualMin % 60;
-              
-              const totalH = Math.floor(totalMins / 60);
-              const totalM = totalMins % 60;
+              const formatMins = (mins) => {
+                const isNeg = mins < 0;
+                const absMins = Math.abs(mins);
+                const h = Math.floor(absMins / 60);
+                const m = absMins % 60;
+                return `${isNeg ? "-" : ""}${h}j ${m}m`;
+              };
+
+              const systemDisplay = formatMins(systemMinutes);
+              const manDisplay = formatMins(manualMin);
+              const totalDisplay = formatMins(totalMins).replace('j', ' Jam').replace('m', ' Menit');
 
               return (
                 <tr key={o.id} className="border-b border-line/50 hover:bg-white/5">
                   <td className="p-3 font-mono text-crimson-400">{o.callsign}</td>
                   <td className="p-3 text-slate-300">{o.full_name}</td>
                   <td className="p-3 text-slate-400">
-                    {systemH}j {systemM}m
+                    {systemDisplay}
                   </td>
                   <td className="p-3">
                     {editingId === o.id ? (
@@ -109,10 +118,10 @@ export default function HoursTableClient({ officers, isAdmin }) {
                         <span className="text-slate-500">m</span>
                       </div>
                     ) : (
-                      <span className="text-slate-300">{manH}j {manM}m</span>
+                      <span className="text-slate-300">{manDisplay}</span>
                     )}
                   </td>
-                  <td className="p-3 font-bold text-emerald-400">{totalH} Jam {totalM} Menit</td>
+                  <td className="p-3 font-bold text-emerald-400">{totalDisplay}</td>
                   {isAdmin && (
                     <td className="p-3 text-right">
                       {editingId === o.id ? (
@@ -125,7 +134,7 @@ export default function HoursTableClient({ officers, isAdmin }) {
                             Batal
                           </button>
                           <button
-                            onClick={() => handleSave(o.id, manualMin)}
+                            onClick={() => handleSave(o.id, manualMin, systemMinutes)}
                             className="btn btn-primary btn-sm"
                             disabled={loading}
                           >
