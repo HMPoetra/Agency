@@ -67,17 +67,20 @@ export default function HoursTableClient({ officers, isAdmin }) {
               const manualMin = parseInt(o.manual_minutes || 0, 10);
               const totalMins = systemMinutes + manualMin;
               
-              const formatMins = (mins) => {
+              const formatMins = (mins, isFull = false) => {
                 const isNeg = mins < 0;
                 const absMins = Math.abs(mins);
                 const h = Math.floor(absMins / 60);
                 const m = absMins % 60;
+                if (isFull) {
+                  return `${isNeg ? "-" : ""}${h} Jam ${m} Menit`;
+                }
                 return `${isNeg ? "-" : ""}${h}j ${m}m`;
               };
 
               const systemDisplay = formatMins(systemMinutes);
               const manDisplay = formatMins(manualMin);
-              const totalDisplay = formatMins(totalMins).replace('j', ' Jam').replace('m', ' Menit');
+              const totalDisplay = formatMins(totalMins, true);
 
               return (
                 <tr key={o.id} className="border-b border-line/50 hover:bg-white/5">
