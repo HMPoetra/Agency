@@ -102,7 +102,7 @@ export default function ImageUpload({ name = "photo_url", defaultValue = "", lab
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onClick={() => !preview && fileInputRef.current?.click()}
+          onClick={(e) => { if (e.target !== fileInputRef.current) fileInputRef.current?.click(); }}
         >
           {/* File Input */}
           <input 
