@@ -5,6 +5,7 @@ const sql = neon(process.env.DATABASE_URL);
 async function main() {
   console.log("Upgrading ala_carte → pricing model…");
   await sql`ALTER TABLE ala_carte ADD COLUMN IF NOT EXISTS price_per_person bigint NOT NULL DEFAULT 0`;
+  await sql`ALTER TABLE ala_carte ALTER COLUMN division_id DROP NOT NULL`;
   await sql`ALTER TABLE ala_carte DROP COLUMN IF EXISTS quantity`;
   await sql`ALTER TABLE ala_carte DROP COLUMN IF EXISTS service`;
 

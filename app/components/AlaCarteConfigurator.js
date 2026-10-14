@@ -130,7 +130,7 @@ export default function AlaCarteConfigurator({ items = [], ranks = [] }) {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">
-                      {d.division_tag || d.division_id}
+                      {d.division_tag || d.division_id || "PAKET"}
                     </span>
                     <span
                       className={`flex size-5 items-center justify-center rounded border ${
@@ -143,7 +143,7 @@ export default function AlaCarteConfigurator({ items = [], ranks = [] }) {
                     </span>
                   </div>
                   <p className="mt-1 truncate font-rajdhani font-bold text-white">
-                    {d.name || d.division_name}
+                    {d.name || d.division_name || d.id}
                   </p>
                   <p className="mt-1 text-xs text-slate-400">
                     {rupiah(d.price_idr)} + {rupiah(d.price_per_person)}/orang
@@ -164,7 +164,7 @@ export default function AlaCarteConfigurator({ items = [], ranks = [] }) {
                   <div className="flex items-center justify-between gap-3">
                     <span className="flex items-center gap-2 font-rajdhani font-bold text-white">
                       <Wrench className="size-3.5 text-crimson-400" aria-hidden="true" />
-                      {l.name || l.division_name}
+                      {l.name || l.division_name || l.id}
                     </span>
                     <span className="flex items-center gap-1.5 rounded-full border border-crimson-500/30 bg-crimson-500/10 px-2.5 py-0.5 font-mono text-xs text-white">
                       <Users className="size-3 text-crimson-400" aria-hidden="true" />
@@ -264,7 +264,7 @@ export default function AlaCarteConfigurator({ items = [], ranks = [] }) {
             {lines.map((l) => (
               <div key={l.id} className="flex items-center justify-between gap-3">
                 <dt className="text-slate-400">
-                  {l.name || l.division_name}{" "}
+                  {l.name || l.division_name || l.id}{" "}
                   <span className="text-slate-500">({l.qty} orang)</span>
                 </dt>
                 <dd className="font-mono text-slate-200">{rupiah(l.subtotal)}</dd>

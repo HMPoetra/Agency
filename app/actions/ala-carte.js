@@ -43,8 +43,8 @@ export async function createAlaCarteOrderAction(prevState, formData) {
         const per = Number(d.price_per_person) || 0;
         return {
           id: d.id,
-          name: d.name || d.division_name,
-          tag: d.division_tag || d.division_id,
+          name: d.name || d.division_name || d.id,
+          tag: d.division_tag || d.division_id || null,
           qty,
           base_price: base,
           price_per_person: per,

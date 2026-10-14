@@ -51,38 +51,41 @@ function DivisionFormModal({ item, mode, divisions, onClose }) {
 
   return (
     <Modal onClose={onClose} title={mode === "edit" ? "Edit Harga Divisi" : "Tambah Harga Divisi"}>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="label">Divisi</label>
-          <select name="division_id" className="field" defaultValue={item?.division_id || ""} required>
-            <option value="" disabled>Pilih divisi…</option>
-            {divisions.map((d) => (
-              <option key={d.id} value={d.id}>{d.name}</option>
-            ))}
-          </select>
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="label">Divisi (opsional)</label>
+            <select name="division_id" className="field" defaultValue={item?.division_id || ""}>
+              <option value="">— Tanpa divisi (pakai judul kustom) —</option>
+              {divisions.map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+          </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="label">Harga Dasar Divisi (Rp)</label>
-            <input name="price_idr" type="number" min="0" className="field" placeholder="0" defaultValue={item?.price_idr ?? 0} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="label">Harga Dasar Divisi (Rp)</label>
+              <input name="price_idr" type="number" min="0" className="field" placeholder="0" defaultValue={item?.price_idr ?? 0} />
+            </div>
+            <div>
+              <label className="label">Harga per Orang (Rp)</label>
+              <input name="price_per_person" type="number" min="0" className="field" placeholder="0" defaultValue={item?.price_per_person ?? 0} />
+            </div>
           </div>
-          <div>
-            <label className="label">Harga per Orang (Rp)</label>
-            <input name="price_per_person" type="number" min="0" className="field" placeholder="0" defaultValue={item?.price_per_person ?? 0} />
-          </div>
-        </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="label">Nama Paket (opsional)</label>
-            <input name="name" className="field" placeholder={item?.division_name || "Nama divisi"} defaultValue={item?.name} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="label">Judul / Nama Paket</label>
+              <input name="name" className="field" placeholder="cth. Paket VIP Escort" defaultValue={item?.name} />
+            </div>
+            <div>
+              <label className="label">Urutan</label>
+              <input name="sort_order" type="number" className="field" defaultValue={item?.sort_order ?? 0} />
+            </div>
           </div>
-          <div>
-            <label className="label">Urutan</label>
-            <input name="sort_order" type="number" className="field" defaultValue={item?.sort_order ?? 0} />
-          </div>
-        </div>
+          <p className="-mt-2 text-xs text-slate-500">
+            Wajib salah satu: pilih divisi <span className="text-slate-600">atau</span> isi judul kustom.
+          </p>
 
         <div>
           <label className="label">Deskripsi (opsional)</label>
@@ -134,10 +137,10 @@ function DivisionCard({ item, divisions, onRefresh }) {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">
-            {item.division_tag || item.division_id} · {item.id}
+            {item.division_tag || item.division_id || "KUSTOM"} · {item.id}
           </span>
           <h3 className="truncate font-rajdhani text-lg font-bold text-white">
-            {item.name || item.division_name}
+            {item.name || item.division_name || item.id}
           </h3>
         </div>
         <span className={`rounded border px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] ${

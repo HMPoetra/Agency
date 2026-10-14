@@ -7,7 +7,7 @@ async function main() {
   await sql`
     CREATE TABLE IF NOT EXISTS ala_carte (
       id                text PRIMARY KEY,
-      division_id       text NOT NULL REFERENCES divisions(id) ON DELETE CASCADE,
+      division_id       text REFERENCES divisions(id) ON DELETE CASCADE,
       name              text NOT NULL DEFAULT '',
       description       text NOT NULL DEFAULT '',
       price_idr         bigint NOT NULL DEFAULT 0,
@@ -18,6 +18,7 @@ async function main() {
       updated_at        timestamptz NOT NULL DEFAULT now()
     )`;
   await sql`ALTER TABLE ala_carte ADD COLUMN IF NOT EXISTS price_per_person bigint NOT NULL DEFAULT 0`;
+  await sql`ALTER TABLE ala_carte ALTER COLUMN division_id DROP NOT NULL`;
   await sql`ALTER TABLE ala_carte DROP COLUMN IF EXISTS quantity`;
   await sql`ALTER TABLE ala_carte DROP COLUMN IF EXISTS service`;
 

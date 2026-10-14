@@ -595,7 +595,7 @@ export async function savePillarsAction(prevState, formData) {
 ═══════════════════════════ */
 function parseAlaCarte(fd) {
   return {
-    division_id: (fd.get("division_id") || "").toString().trim(),
+    division_id: (fd.get("division_id") || "").toString().trim() || null,
     name: (fd.get("name") || "").toString().trim(),
     description: (fd.get("description") || "").toString().trim(),
     price_idr: Number(fd.get("price_idr")) || 0,
@@ -605,10 +605,18 @@ function parseAlaCarte(fd) {
   };
 }
 
+function validateAlaCarte(data) {
+  if (!data.division_id && !data.name) {
+    return "Isi Judul Paket, atau pilih divisi.";
+  }
+  return null;
+}
+
 export async function createAlaCarteAction(prevState, formData) {
   await requireAdmin();
   const data = parseAlaCarte(formData);
-  if (!data.division_id) return { error: "Divisi wajib dipilih." };
+  const invalid = validateAlaCarte(data);
+  if (invalid) return { error: invalid };
   try {
     data.id = await nextAlaCarteId();
     await createAlaCarte(data);
@@ -623,7 +631,8 @@ export async function createAlaCarteAction(prevState, formData) {
 export async function updateAlaCarteAction(id, prevState, formData) {
   await requireAdmin();
   const data = parseAlaCarte(formData);
-  if (!data.division_id) return { error: "Divisi wajib dipilih." };
+  const invalid = validateAlaCarte(data);
+  if (invalid) return { error: invalid };
   try {
     await updateAlaCarte(id, data);
     revalidatePath("/admin/ala-carte");
