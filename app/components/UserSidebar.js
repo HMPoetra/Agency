@@ -105,7 +105,7 @@ export default function UserSidebar({ username }) {
         <button
           type="button"
           onClick={close}
-          className="absolute right-3 top-3 text-slate-500 hover:text-white"
+          className="absolute right-3 top-3 flex size-10 items-center justify-center rounded-lg text-slate-500 hover:text-white"
           aria-label="Tutup menu"
         >
           <X className="size-5" />

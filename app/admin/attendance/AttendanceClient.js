@@ -35,17 +35,12 @@ export default function AttendanceClient({ initialRecords, officers, divisions =
   const divName = Object.fromEntries(divisions.map((d) => [d.id, d.name]));
   const divisionLabel = (csv) =>
     (csv ? csv.split(", ") : []).map((id) => divName[id] || id).join(", ") || "-";
-  const [records, setRecords] = useState(initialRecords);
+  const records = initialRecords;
   const [editingRec, setEditingRec] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   
   // Set default filter date to today (local time)
   const [filterDate, setFilterDate] = useState(() => toJakartaDateKey(new Date()));
-
-  // Sync with prop
-  useEffect(() => {
-    setRecords(initialRecords);
-  }, [initialRecords]);
 
   // Filter records based on selected date
   const filteredRecords = filterDate
@@ -54,12 +49,12 @@ export default function AttendanceClient({ initialRecords, officers, divisions =
 
   return (
     <div className="card overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-line">
+      <div className="flex flex-col gap-3 p-4 border-b border-line sm:flex-row sm:items-center sm:justify-between">
         <h2 className="font-rajdhani text-lg font-bold text-white">Laporan Duty</h2>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => setIsAdding(true)}
-            className="btn btn-primary btn-sm flex items-center gap-1 mr-4"
+            className="btn btn-primary btn-sm flex items-center gap-1"
           >
             <Plus className="size-4" />
             Tambah Manual
@@ -75,7 +70,7 @@ export default function AttendanceClient({ initialRecords, officers, divisions =
           {filterDate && (
             <button 
               onClick={() => setFilterDate("")}
-              className="text-xs text-crimson-400 hover:text-crimson-300"
+              className="text-xs text-crimson-400 hover:text-crimson-300 py-2"
             >
               Clear
             </button>
@@ -131,11 +126,11 @@ export default function AttendanceClient({ initialRecords, officers, divisions =
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
-                    <button onClick={() => setEditingRec(rec)} className="p-1.5 text-slate-400 hover:text-white transition-colors">
+                    <button onClick={() => setEditingRec(rec)} className="p-2.5 text-slate-400 hover:text-white transition-colors" aria-label="Edit absensi">
                       <Edit2 className="size-4" />
                     </button>
                     <form action={() => deleteAttendanceAction(rec.id)} onSubmit={e => { if(!confirm("Hapus absen?")) e.preventDefault() }}>
-                      <button type="submit" className="p-1.5 text-slate-400 hover:text-crimson-400 transition-colors">
+                      <button type="submit" className="p-2.5 text-slate-400 hover:text-crimson-400 transition-colors" aria-label="Hapus absensi">
                         <Trash2 className="size-4" />
                       </button>
                     </form>
@@ -181,8 +176,8 @@ function AttendanceModal({ rec, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="card relative w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
-        <button onClick={onClose} className="absolute right-4 top-4 text-slate-400 hover:text-white">
+      <div className="card relative max-h-[90vh] w-full max-w-md overflow-y-auto p-6 animate-in fade-in zoom-in-95 duration-200">
+        <button onClick={onClose} className="absolute right-3 top-3 flex size-10 items-center justify-center rounded-lg text-slate-400 hover:text-white" aria-label="Tutup">
           <X className="size-5" />
         </button>
         
@@ -249,8 +244,8 @@ function AddAttendanceModal({ officers, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="card relative w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">
-        <button onClick={onClose} className="absolute right-4 top-4 text-slate-400 hover:text-white">
+      <div className="card relative max-h-[90vh] w-full max-w-md overflow-y-auto p-6 animate-in fade-in zoom-in-95 duration-200">
+        <button onClick={onClose} className="absolute right-3 top-3 flex size-10 items-center justify-center rounded-lg text-slate-400 hover:text-white" aria-label="Tutup">
           <X className="size-5" />
         </button>
         
@@ -273,7 +268,7 @@ function AddAttendanceModal({ officers, onClose }) {
               <button 
                 type="button" 
                 onClick={() => setTimeToNow(setCheckInTime)}
-                className="text-[10px] uppercase tracking-wider text-crimson-400 hover:text-crimson-300 font-mono"
+                className="text-[10px] uppercase tracking-wider text-crimson-400 hover:text-crimson-300 font-mono py-1.5 px-1"
               >
                 Set Sekarang
               </button>
@@ -295,7 +290,7 @@ function AddAttendanceModal({ officers, onClose }) {
               <button 
                 type="button" 
                 onClick={() => setTimeToNow(setCheckOutTime)}
-                className="text-[10px] uppercase tracking-wider text-crimson-400 hover:text-crimson-300 font-mono"
+                className="text-[10px] uppercase tracking-wider text-crimson-400 hover:text-crimson-300 font-mono py-1.5 px-1"
               >
                 Set Sekarang
               </button>

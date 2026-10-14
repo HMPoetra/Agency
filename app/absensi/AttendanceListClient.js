@@ -59,7 +59,7 @@ export default function AttendanceListClient({ records = [] }) {
           <span className="text-slate-500 text-xs">-</span>
           <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="field w-auto text-sm h-9" />
           {(start || end) && (
-            <button onClick={() => { setStart(""); setEnd(""); }} className="text-xs text-crimson-400 hover:text-crimson-300">
+            <button onClick={() => { setStart(""); setEnd(""); }} className="py-2 text-xs text-crimson-400 hover:text-crimson-300">
               Semua
             </button>
           )}

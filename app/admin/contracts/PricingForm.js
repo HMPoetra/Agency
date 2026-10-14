@@ -1,16 +1,21 @@
 "use client";
 
-import { useState, useActionState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus, X, Tag, Pencil } from "lucide-react";
 import { createPricingAction, updatePricingAction } from "@/app/actions/admin";
 import { toast } from "sonner";
+import { useFormAction } from "@/app/hooks/useFormAction";
+import { useMounted } from "@/app/hooks/useMounted";
 
 export default function PricingForm({ pricing, mode = "create" }) {
   const [open, setOpen] = useState(false);
+  const mounted = useMounted();
   const action = mode === "create" ? createPricingAction : updatePricingAction.bind(null, pricing?.id);
-  const [state, formAction, pending] = useActionState(action, null);
-  const [mounted, setMounted] = useState(false);
+  const { handleSubmit, pending, error } = useFormAction(action, () => {
+    toast.success(mode === "create" ? "Paket Harga berhasil ditambahkan!" : "Paket Harga berhasil diperbarui!");
+    setOpen(false);
+  });
   const [price, setPrice] = useState(pricing?.price_idr ? String(pricing.price_idr) : "");
 
   const handlePriceChange = (e) => {
@@ -22,19 +27,6 @@ export default function PricingForm({ pricing, mode = "create" }) {
     if (!val) return "";
     return new Intl.NumberFormat("id-ID").format(val);
   };
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (state?.success && open) {
-      toast.success(mode === "create" ? "Paket Harga berhasil ditambahkan!" : "Paket Harga berhasil diperbarui!");
-      setOpen(false);
-    } else if (state?.error && open) {
-      toast.error(state.error);
-    }
-  }, [state, open, mode]);
 
   return (
     <>
@@ -63,12 +55,12 @@ export default function PricingForm({ pricing, mode = "create" }) {
               <h2 className="font-orbitron text-lg font-bold text-white">
                 {mode === "create" ? "Tambah Paket Harga" : "Edit Paket Harga"}
               </h2>
-              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setOpen(false)} className="flex size-10 items-center justify-center rounded-lg text-slate-400 hover:text-white" aria-label="Tutup">
                 <X className="size-5" />
               </button>
             </div>
 
-            <form action={formAction} className="p-6">
+            <form onSubmit={handleSubmit} className="p-6">
               <div className="grid gap-5">
                 <div>
                   <label className="label">Nama Paket (Wajib)</label>
@@ -78,7 +70,7 @@ export default function PricingForm({ pricing, mode = "create" }) {
                   <label className="label">Tag / Label (Misal: Basic, Pro, Elite)</label>
                   <input type="text" name="tag" className="field" defaultValue={pricing?.tag} placeholder="Elite" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="label">Harga (IDR)</label>
                     <div className="relative">
@@ -103,7 +95,7 @@ export default function PricingForm({ pricing, mode = "create" }) {
                   <label className="label">Label Tombol (CTA)</label>
                   <input type="text" name="cta_label" className="field" defaultValue={pricing?.cta_label || "Pesan Sekarang"} />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="label">Ikon (Lucide)</label>
                     <input type="text" name="icon_name" className="field" defaultValue={pricing?.icon_name || "Shield"} />
@@ -135,8 +127,8 @@ export default function PricingForm({ pricing, mode = "create" }) {
                   </label>
                 </div>
 
-                {state?.error && (
-                  <p className="text-sm text-crimson-400">{state.error}</p>
+                {error && (
+                  <p className="text-sm text-crimson-400">{error}</p>
                 )}
 
                 <div className="mt-2 flex justify-end gap-3 border-t border-line pt-5">

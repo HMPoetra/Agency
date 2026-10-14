@@ -156,12 +156,12 @@ function PillarsForm({ initial }) {
       <div className="space-y-4">
         {rows.map((row, i) => (
           <div key={i} className="rounded-lg border border-line p-4 space-y-3">
-            <div className="flex gap-3">
-              <select className="field w-40" value={row.icon_name} onChange={(e) => update(i, "icon_name", e.target.value)}>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <select className="field sm:w-40" value={row.icon_name} onChange={(e) => update(i, "icon_name", e.target.value)}>
                 {ICONS.map((ic) => <option key={ic} value={ic}>{ic}</option>)}
               </select>
               <input className="field flex-1" placeholder="Judul pilar" value={row.title} onChange={(e) => update(i, "title", e.target.value)} />
-              <button type="button" onClick={() => setRows((rs) => rs.filter((_, idx) => idx !== i))} className="p-2 text-slate-400 hover:text-crimson-400">
+              <button type="button" onClick={() => setRows((rs) => rs.filter((_, idx) => idx !== i))} className="self-end p-2.5 text-slate-400 hover:text-crimson-400 sm:self-auto">
                 <Trash2 className="size-4" />
               </button>
             </div>

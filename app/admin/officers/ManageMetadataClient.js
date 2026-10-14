@@ -39,7 +39,8 @@ export default function ManageMetadataClient({ ranks }) {
                 onClick={() => {
                   if (confirm("Hapus pangkat ini?")) deleteRankAction(r.id);
                 }}
-                className="text-slate-500 hover:text-crimson-400"
+                className="p-2.5 text-slate-500 hover:text-crimson-400"
+                aria-label={`Hapus pangkat ${r.name}`}
               >
                 <Trash2 className="size-4" />
               </button>

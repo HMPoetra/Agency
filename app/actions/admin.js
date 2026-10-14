@@ -14,7 +14,8 @@ import {
   createPricingTier, updatePricingTier, deletePricingTier,
   createProduct, updateProduct, deleteProduct,
   updateReview, deleteReview, toggleReviewPublish,
-  updateSiteContent, replaceStats, replacePillars
+  updateSiteContent, replaceStats, replacePillars,
+  createAlaCarte, updateAlaCarte, setAlaCarteActive, deleteAlaCarte, nextAlaCarteId,
 } from "@/lib/queries";
 import { processImageUrl } from "@/lib/upload";
 
@@ -585,4 +586,61 @@ export async function savePillarsAction(prevState, formData) {
   } catch (e) {
     return { error: e.message };
   }
+}
+
+/* ═══════════════════════════
+   ALA CARTE
+═══════════════════════════ */
+function parseAlaCarte(fd) {
+  return {
+    division_id: (fd.get("division_id") || "").toString().trim(),
+    name: (fd.get("name") || "").toString().trim(),
+    description: (fd.get("description") || "").toString().trim(),
+    price_idr: Number(fd.get("price_idr")) || 0,
+    sort_order: Number(fd.get("sort_order")) || 0,
+    is_active: fd.get("is_active") === "on",
+  };
+}
+
+export async function createAlaCarteAction(prevState, formData) {
+  await requireAdmin();
+  const data = parseAlaCarte(formData);
+  if (!data.division_id) return { error: "Divisi wajib dipilih." };
+  try {
+    data.id = await nextAlaCarteId();
+    await createAlaCarte(data);
+    revalidatePath("/admin/ala-carte");
+    revalidatePath("/");
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+export async function updateAlaCarteAction(id, prevState, formData) {
+  await requireAdmin();
+  const data = parseAlaCarte(formData);
+  if (!data.division_id) return { error: "Divisi wajib dipilih." };
+  try {
+    await updateAlaCarte(id, data);
+    revalidatePath("/admin/ala-carte");
+    revalidatePath("/");
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+export async function setAlaCarteActiveAction(id, isActive) {
+  await requireAdmin();
+  await setAlaCarteActive(id, isActive);
+  revalidatePath("/admin/ala-carte");
+  revalidatePath("/");
+}
+
+export async function deleteAlaCarteAction(id) {
+  await requireAdmin();
+  await deleteAlaCarte(id);
+  revalidatePath("/admin/ala-carte");
+  revalidatePath("/");
 }

@@ -57,7 +57,7 @@ export default async function ReviewsPage() {
                 <h3 className="font-rajdhani text-lg font-bold text-white">{review.name_server}</h3>
                 
                 <div className="mt-3 flex-1">
-                  <p className="text-sm text-slate-400 italic">"{review.message}"</p>
+                  <p className="text-sm text-slate-400 italic">&ldquo;{review.message}&rdquo;</p>
                 </div>
                 
                 <div className="mt-4 text-[10px] text-slate-600 font-mono">

@@ -1,11 +1,13 @@
 // app/admin/officers/OfficerForm.js
 "use client";
 
-import { useActionState, useState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { createOfficerAction, updateOfficerAction } from "@/app/actions/admin";
 import { Plus, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
+import { useFormAction } from "@/app/hooks/useFormAction";
+import { useMounted } from "@/app/hooks/useMounted";
 
 const DEFAULT_RANKS = [
   "All Rank",
@@ -19,32 +21,18 @@ const GENDERS = ["Laki-laki", "Perempuan", "Lainnya"];
 
 export default function OfficerForm({ officer, divisions, ranks, mode }) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
 
   const activeRanks = ranks ? ranks.map(r => r.name) : DEFAULT_RANKS;
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const action = mode === "edit"
     ? updateOfficerAction.bind(null, officer.id)
     : createOfficerAction;
 
-  const [state, dispatch, pending] = useActionState(action, null);
-
-  // Auto-close on success and alert
-  useEffect(() => {
-    if (state?.success && open) {
-      toast.success(mode === "edit" ? "Data personil berhasil diperbarui!" : "Data personil berhasil ditambahkan!");
-      setOpen(false);
-    } else if (state?.error && open) {
-      toast.error(state.error);
-    }
-  }, [state, open, mode]);
-
-
-
+  const { handleSubmit, pending, error } = useFormAction(action, () => {
+    toast.success(mode === "edit" ? "Data personil berhasil diperbarui!" : "Data personil berhasil ditambahkan!");
+    setOpen(false);
+  });
 
 
   return (
@@ -67,12 +55,12 @@ export default function OfficerForm({ officer, divisions, ranks, mode }) {
               <h2 className="font-rajdhani text-xl font-bold text-white">
                 {mode === "edit" ? "Edit Personil" : "Tambah Personil"}
               </h2>
-              <button type="button" onClick={() => setOpen(false)} className="text-slate-500 hover:text-white">
+              <button type="button" onClick={() => setOpen(false)} className="flex size-10 items-center justify-center rounded-lg text-slate-500 hover:text-white" aria-label="Tutup">
                 <X className="size-5" />
               </button>
             </div>
 
-            <form action={dispatch} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* ID auto-generated */}
               <div>
                 <label className="label">Nama Lengkap</label>
@@ -145,8 +133,8 @@ export default function OfficerForm({ officer, divisions, ranks, mode }) {
                 <input name="notes" type="text" className="field" placeholder="-" defaultValue={officer?.notes} />
               </div>
 
-              {state?.error && (
-                <p className="text-sm text-crimson-400">{state.error}</p>
+              {error && (
+                <p className="text-sm text-crimson-400">{error}</p>
               )}
 
               <div className="flex gap-3 pt-2">

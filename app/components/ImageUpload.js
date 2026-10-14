@@ -77,7 +77,7 @@ export default function ImageUpload({ name = "photo_url", defaultValue = "", lab
         <button 
           type="button" 
           onClick={() => setInputType(inputType === "url" ? "file" : "url")}
-          className="text-[10px] uppercase tracking-wider text-crimson-400 hover:text-crimson-300"
+          className="py-2 text-[10px] uppercase tracking-wider text-crimson-400 hover:text-crimson-300"
         >
           {inputType === "url" ? "Gunakan Upload File" : "Gunakan Link URL"}
         </button>
@@ -120,7 +120,8 @@ export default function ImageUpload({ name = "photo_url", defaultValue = "", lab
               <button 
                 type="button" 
                 onClick={(e) => { e.stopPropagation(); clearImage(); }}
-                className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-crimson-500 text-white rounded-md transition-colors"
+                className="absolute top-2 right-2 p-2.5 bg-black/70 hover:bg-crimson-500 text-white rounded-md transition-colors"
+                aria-label="Hapus gambar"
               >
                 <X className="size-4" />
               </button>

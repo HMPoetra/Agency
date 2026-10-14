@@ -1,35 +1,26 @@
 "use client";
 
-import { useActionState, useState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { createDivisionAction, updateDivisionAction } from "@/app/actions/admin";
 import { Plus, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "@/app/components/ImageUpload";
+import { useFormAction } from "@/app/hooks/useFormAction";
+import { useMounted } from "@/app/hooks/useMounted";
 
 export default function DivisionForm({ division, mode }) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   const action = mode === "edit"
     ? updateDivisionAction.bind(null, division.id)
     : createDivisionAction;
 
-  const [state, dispatch, pending] = useActionState(action, null);
-
-  useEffect(() => {
-    if (state?.success && open) {
-      toast.success(mode === "edit" ? "Divisi berhasil diperbarui!" : "Divisi berhasil ditambahkan!");
-      setOpen(false);
-    } else if (state?.error && open) {
-      toast.error(state.error);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  const { handleSubmit, pending, error } = useFormAction(action, () => {
+    toast.success(mode === "edit" ? "Divisi berhasil diperbarui!" : "Divisi berhasil ditambahkan!");
+    setOpen(false);
+  });
 
   return (
     <>
@@ -50,12 +41,12 @@ export default function DivisionForm({ division, mode }) {
               <h2 className="font-rajdhani text-xl font-bold text-white">
                 {mode === "edit" ? "Edit Divisi" : "Tambah Divisi"}
               </h2>
-              <button type="button" onClick={() => setOpen(false)} className="text-slate-500 hover:text-white">
+              <button type="button" onClick={() => setOpen(false)} className="flex size-10 items-center justify-center rounded-lg text-slate-500 hover:text-white" aria-label="Tutup">
                 <X className="size-5" />
               </button>
             </div>
 
-            <form action={dispatch} className="space-y-4" encType="multipart/form-data">
+            <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="label">Nama Divisi</label>
@@ -92,8 +83,8 @@ export default function DivisionForm({ division, mode }) {
                 </label>
               </div>
 
-              {state?.error && (
-                <p className="text-sm text-crimson-400">{state.error}</p>
+              {error && (
+                <p className="text-sm text-crimson-400">{error}</p>
               )}
 
               <div className="flex gap-3 pt-2">

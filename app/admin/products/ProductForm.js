@@ -1,16 +1,21 @@
 "use client";
 
-import { useState, useActionState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus, X, Pencil } from "lucide-react";
 import { createProductAction, updateProductAction } from "@/app/actions/admin";
 import { toast } from "sonner";
+import { useFormAction } from "@/app/hooks/useFormAction";
+import { useMounted } from "@/app/hooks/useMounted";
 
 export default function ProductForm({ product, mode = "create" }) {
   const [open, setOpen] = useState(false);
+  const mounted = useMounted();
   const action = mode === "create" ? createProductAction : updateProductAction.bind(null, product?.id);
-  const [state, formAction, pending] = useActionState(action, null);
-  const [mounted, setMounted] = useState(false);
+  const { handleSubmit, pending, error } = useFormAction(action, () => {
+    toast.success(mode === "create" ? "Aset berhasil ditambahkan!" : "Aset berhasil diperbarui!");
+    setOpen(false);
+  });
   const [price, setPrice] = useState(product?.price_idr ? String(product.price_idr) : "");
 
   const handlePriceChange = (e) => {
@@ -23,19 +28,6 @@ export default function ProductForm({ product, mode = "create" }) {
     if (!val) return "";
     return new Intl.NumberFormat("id-ID").format(val);
   };
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (state?.success && open) {
-      toast.success(mode === "create" ? "Aset berhasil ditambahkan!" : "Aset berhasil diperbarui!");
-      setOpen(false);
-    } else if (state?.error && open) {
-      toast.error(state.error);
-    }
-  }, [state, open, mode]);
 
   const initialFeatures = product?.features?.join("\n") || "";
   const initialPhotos = product?.photo_urls 
@@ -69,12 +61,12 @@ export default function ProductForm({ product, mode = "create" }) {
               <h2 className="font-orbitron text-lg font-bold text-white">
                 {mode === "create" ? "Tambah Script / Asset" : "Edit Script / Asset"}
               </h2>
-              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setOpen(false)} className="flex size-10 items-center justify-center rounded-lg text-slate-400 hover:text-white" aria-label="Tutup">
                 <X className="size-5" />
               </button>
             </div>
 
-            <form action={formAction} className="p-6">
+            <form onSubmit={handleSubmit} className="p-6">
               <div className="grid gap-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -143,8 +135,8 @@ export default function ProductForm({ product, mode = "create" }) {
                   </label>
                 </div>
 
-                {state?.error && (
-                  <p className="text-sm text-crimson-400">{state.error}</p>
+                {error && (
+                  <p className="text-sm text-crimson-400">{error}</p>
                 )}
 
                 <div className="mt-2 flex justify-end gap-3 border-t border-line pt-5">

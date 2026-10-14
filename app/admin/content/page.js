@@ -1,12 +1,12 @@
 // app/admin/content/page.js
-import { getContent } from "@/lib/queries";
+import { getContent, getOfficers } from "@/lib/queries";
 import ContentClient from "@/app/components/ContentClient";
 import { Film } from "lucide-react";
 
 export const metadata = { title: "Content — Admin COP-S" };
 
 export default async function AdminContentPage() {
-  const items = await getContent();
+  const [items, officers] = await Promise.all([getContent(), getOfficers()]);
 
   return (
     <div>
@@ -24,7 +24,7 @@ export default async function AdminContentPage() {
         </p>
       </div>
 
-      <ContentClient items={items} isAdmin />
+      <ContentClient items={items} isAdmin officers={officers} />
     </div>
   );
 }

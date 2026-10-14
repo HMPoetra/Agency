@@ -24,8 +24,8 @@ export default async function ProfilePage() {
         <div className="wrap flex h-14 items-center justify-between">
           <div className="flex items-center gap-4">
             {session.role === "officer" && (
-              <Link href="/absensi" className="text-slate-400 hover:text-white transition-colors">
-                <ArrowLeft className="size-4" />
+              <Link href="/absensi" className="flex size-10 items-center justify-center rounded-lg text-slate-400 hover:text-white transition-colors" aria-label="Kembali">
+                <ArrowLeft className="size-5" />
               </Link>
             )}
             <span className="font-orbitron text-sm font-bold tracking-[0.2em] text-white">

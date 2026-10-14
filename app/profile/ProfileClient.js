@@ -150,9 +150,9 @@ export default function ProfileClient({ session, officer, divisions = [] }) {
             <button 
               type="button" 
               onClick={() => setShowPassword(!showPassword)}
-              className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+              className="flex min-h-10 items-center gap-1.5 px-1 text-xs font-medium text-slate-400 hover:text-white transition-colors"
             >
-              {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               {showPassword ? "Sembunyikan" : "Lihat"} Password
             </button>
           </div>

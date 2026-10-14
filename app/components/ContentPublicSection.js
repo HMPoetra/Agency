@@ -19,7 +19,7 @@ function CategoryChip({ label, active, onClick }) {
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors ${
+      className={`flex min-h-10 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors ${
         active
           ? "border-crimson-500/40 bg-crimson-500/15 text-white"
           : "border-line text-slate-400 hover:border-line-strong hover:text-white"

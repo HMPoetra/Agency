@@ -1,6 +1,7 @@
 // app/login/page.js
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import LoginForm from "./LoginForm";
 
 export const metadata = {
@@ -48,9 +49,9 @@ export default async function LoginPage() {
         </p>
         
         <div className="mt-8 flex justify-center">
-          <a href="/" className="btn btn-ghost text-sm">
+          <Link href="/" className="btn btn-ghost text-sm">
             &larr; Kembali ke Dashboard Utama
-          </a>
+          </Link>
         </div>
       </div>
     </div>

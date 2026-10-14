@@ -34,13 +34,13 @@ export default function LoginForm() {
             type={show ? "text" : "password"}
             autoComplete="current-password"
             required
-            className="field pr-11"
+            className="field pr-12"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShow((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+            className="absolute right-1.5 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 hover:text-white transition-colors"
             aria-label={show ? "Sembunyikan password" : "Tampilkan password"}
           >
             {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}

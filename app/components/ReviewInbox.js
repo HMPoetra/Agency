@@ -15,7 +15,7 @@ export default function ReviewInbox({ reviews = [] }) {
         {reviews.length > 0 && (
           <div className="mb-16">
             <div className="text-center mb-10">
-              <h2 className="font-orbitron text-3xl font-bold text-white uppercase tracking-wider">
+              <h2 className="font-orbitron text-2xl font-bold text-white uppercase tracking-wider sm:text-3xl">
                 Ulasan Klien Kami
               </h2>
               <p className="mt-3 text-slate-400">
@@ -33,7 +33,7 @@ export default function ReviewInbox({ reviews = [] }) {
                       ))}
                     </div>
                     <p className="text-slate-300 italic text-sm leading-relaxed text-pretty">
-                      "{r.message}"
+                      &ldquo;{r.message}&rdquo;
                     </p>
                   </div>
                   <div className="mt-6 pt-4 border-t border-line/50 flex items-center justify-between">
@@ -90,10 +90,11 @@ export default function ReviewInbox({ reviews = [] }) {
                       onClick={() => setRating(star)}
                       onMouseEnter={() => setHoverRating(star)}
                       onMouseLeave={() => setHoverRating(0)}
-                      className="transition-transform hover:scale-110 focus:outline-none"
+                      aria-label={`Beri ${star} bintang`}
+                      className="p-1 transition-transform hover:scale-110 focus:outline-none"
                     >
                       <Star 
-                        className={`size-8 ${
+                        className={`size-7 ${
                           star <= (hoverRating || rating) 
                             ? "text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" 
                             : "text-slate-700"

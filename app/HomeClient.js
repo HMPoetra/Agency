@@ -105,7 +105,8 @@ const accent = {
     dot: "bg-rose-400",
     chip: "border-rose-500/30 bg-rose-500/10 text-rose-400",
     hover: "hover:border-rose-500/40",
-    ring: "border-rose-500/30 bg-rose-500/5",
+    ring: "border-rose-500/50 bg-rose-500/20",
+    emblemBg: "bg-rose-600/30 border-rose-500/60",
     rgb: "244,63,94",
   },
   blue: {
@@ -113,7 +114,8 @@ const accent = {
     dot: "bg-pine-400",
     chip: "border-pine-500/30 bg-pine-500/10 text-pine-400",
     hover: "hover:border-pine-500/40",
-    ring: "border-pine-500/30 bg-pine-500/5",
+    ring: "border-pine-500/50 bg-pine-500/20",
+    emblemBg: "bg-pine-600/30 border-pine-500/60",
     rgb: "229,51,51",
   },
 };
@@ -383,7 +385,7 @@ const products = [
    PAGE
    ══════════════════════════════════════════ */
 
-export default function HomeClient({ statsData, pillarsData, divisionsData, officersData, contractsData, pricingData, productsData, reviewsData, content, liveContent = [] }) {
+export default function HomeClient({ statsData, pillarsData, divisionsData, officersData, contractsData, pricingData, productsData, reviewsData, content, liveContent = [], alaCarteData = [] }) {
   return (
     <>
       <HeroSection stats={statsData} pillars={pillarsData} contracts={contractsData} content={content} />
@@ -391,7 +393,7 @@ export default function HomeClient({ statsData, pillarsData, divisionsData, offi
       <DivisionSection divisions={divisionsData} />
       <ContentPublicSection items={liveContent} />
       <RosterSection officers={officersData} divisions={divisionsData} />
-      <PricingSection contracts={contractsData} pricing={pricingData} />
+      <PricingSection contracts={contractsData} pricing={pricingData} alaCarte={alaCarteData} />
       <ScriptsSection products={productsData} />
       <ReviewInbox reviews={reviewsData} />
       <CtaSection />
@@ -726,7 +728,7 @@ function DivisionSection({ divisions }) {
 /* ─── 04 Roster ─── */
 
 function RosterSection({ officers, divisions }) {
-  const officersData = officers ?? [];
+  const officersData = useMemo(() => officers ?? [], [officers]);
   const divs = divisions ?? [];
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
@@ -816,7 +818,7 @@ function RosterSection({ officers, divisions }) {
                     type="button"
                     onClick={() => setFilter(f.id)}
                     aria-pressed={filter === f.id}
-                    className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${filter === f.id
+                    className={`flex min-h-10 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${filter === f.id
                       ? "border-crimson-500/40 bg-crimson-500/15 text-white"
                       : "border-line text-slate-400 hover:border-line-strong hover:text-white"
                       }`}
@@ -899,7 +901,7 @@ function RosterSection({ officers, divisions }) {
 
 /* ─── 05 Harga & Kontak ─── */
 
-function PricingSection({ contracts, pricing }) {
+function PricingSection({ contracts, pricing, alaCarte = [] }) {
   const activeContracts = contracts ?? [];
   const pricingTiers = pricing ?? [];
   return (
@@ -1111,6 +1113,8 @@ function PricingSection({ contracts, pricing }) {
             </div>
           </div>
         </div>
+
+        <AlaCarteBlock items={alaCarte} />
       </div>
     </section>
   );
@@ -1158,10 +1162,61 @@ function MouCta() {
   );
 }
 
+/* ─── 05b Ala Carte ─── */
+
+function AlaCarteBlock({ items = [] }) {
+  const list = items ?? [];
+  if (items === null || items === undefined || items.length === 0) return null;
+  return (
+    <div className="mt-16">
+      <div className="flex items-center gap-2">
+        <Tag className="size-4 text-crimson-400" aria-hidden="true" />
+        <h3 className="font-rajdhani text-lg font-bold text-white">
+          Ala <TypeTitle as="span" text="*Carte*" />
+        </h3>
+      </div>
+      <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-400">
+        Paket satuan per divisi — pilih hanya yang server Anda butuhkan, tanpa
+        terikat kontrak penuh.
+      </p>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((item) => (
+          <div key={item.id} className="card flex flex-col p-5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">
+                {item.division_tag || item.division_id}
+              </span>
+              <span className="flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-[11px] text-slate-300">
+                <Users className="size-3.5 text-crimson-400" aria-hidden="true" />
+                {item.player_count} pemain
+              </span>
+            </div>
+            <h3 className="mt-3 font-rajdhani text-lg font-bold text-white">
+              {item.name || item.division_name}
+            </h3>
+            {item.description && (
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
+                {item.description}
+              </p>
+            )}
+            <p className="mt-4 font-orbitron text-xl font-bold text-white">
+              <CountUp value={Number(item.price_idr) || 0} prefix="Rp " />
+            </p>
+            <a href="#kontak" className="btn btn-ghost btn-sm mt-4">
+              Pesan Paket <ArrowUpRight className="size-3.5" />
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ─── 06 Script & Assets ─── */
 
 function ScriptsSection({ products }) {
-  const productsList = products ?? [];
+  const productsList = useMemo(() => products ?? [], [products]);
   const [filter, setFilter] = useState("All");
 
   const categories = ["All", ...Array.from(new Set(productsList.map(p => p.category)))];
@@ -1196,7 +1251,7 @@ function ScriptsSection({ products }) {
               type="button"
               onClick={() => setFilter(c)}
               aria-pressed={filter === c}
-              className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${filter === c
+              className={`flex min-h-10 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${filter === c
                 ? "border-pine-500/40 bg-pine-500/15 text-white"
                 : "border-line text-slate-400 hover:border-line-strong hover:text-white"
                 }`}
@@ -1569,15 +1624,15 @@ function OfficerCard({ officer, divName = {} }) {
 
       <div className="mt-5 flex items-center gap-3.5">
         <span
-          className={`flex size-12 flex-shrink-0 items-center justify-center rounded-lg border font-orbitron text-xs font-bold ${tone.ring} ${tone.text}`}
+          className={`flex size-14 flex-shrink-0 items-center justify-center rounded-xl border-2 font-orbitron text-sm font-bold tracking-tight ${tone.emblemBg} ${tone.text}`}
         >
           {monogram}
         </span>
-        <div className="min-w-0">
-          <h3 className="truncate font-rajdhani text-lg font-bold text-white">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-rajdhani text-lg font-bold leading-tight text-white">
             {officer.name}
           </h3>
-          <p className="truncate font-mono text-[11px] text-slate-500">
+          <p className="truncate font-mono text-[11px] text-slate-500 mt-0.5">
             {officer.callsign}
           </p>
         </div>
@@ -1592,15 +1647,17 @@ function OfficerCard({ officer, divName = {} }) {
         ].map(([key, value], i, rows) => (
           <div
             key={key}
-            className={`flex items-center justify-between py-2 ${i < rows.length - 1 ? "border-b border-line" : ""
+            className={`flex items-start justify-between gap-4 py-3 ${i < rows.length - 1 ? "border-b border-line" : ""
               }`}
           >
-            <dt className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
+            <dt className="shrink-0 text-[11px] uppercase tracking-[0.12em] text-slate-500">
               {key}
             </dt>
             <dd
               className={
-                key === "Divisi" ? `font-medium ${tone.text}` : "text-slate-200"
+                `text-right leading-snug max-w-[60%] break-words ${
+                  key === "Divisi" ? `font-medium ${tone.text}` : "text-slate-200"
+                }`
               }
             >
               {value}
@@ -1693,7 +1750,7 @@ function OfficerCard({ officer, divName = {} }) {
 
       <a
         href="#kontak"
-        className="btn btn-ghost btn-sm mt-auto pt-4 w-full opacity-0 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 sm:opacity-100"
+        className="btn btn-ghost btn-sm mt-4 pt-3 w-full border-t border-line opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 sm:focus-visible:opacity-100"
       >
         Minta Profil Lengkap
       </a>

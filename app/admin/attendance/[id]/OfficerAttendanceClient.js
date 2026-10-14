@@ -57,17 +57,17 @@ export default function OfficerAttendanceClient({ officer, initialRecords }) {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 border-b border-line pb-4">
         <h3 className="font-rajdhani text-lg font-bold text-white tracking-widest uppercase">Laporan Berkala</h3>
         <div className="flex flex-wrap items-center gap-4 bg-white/[0.02] border border-line rounded-lg p-1">
-          <button onClick={() => shiftTable(-1)} className="p-1 hover:text-white text-slate-400 transition-colors"><ChevronLeft className="size-5" /></button>
+          <button onClick={() => shiftTable(-1)} className="p-2.5 hover:text-white text-slate-400 transition-colors" aria-label="Minggu sebelumnya"><ChevronLeft className="size-5" /></button>
           <span className="font-mono text-xs text-slate-300">
             {weekDays[0].toLocaleDateString('id-ID', {day:'2-digit', month:'short'})} - {weekDays[weekDays.length-1].toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'})}
           </span>
-          <button onClick={() => shiftTable(1)} className="p-1 hover:text-white text-slate-400 transition-colors"><ChevronRight className="size-5" /></button>
+          <button onClick={() => shiftTable(1)} className="p-2.5 hover:text-white text-slate-400 transition-colors" aria-label="Minggu berikutnya"><ChevronRight className="size-5" /></button>
           
           <div className="h-4 w-px bg-line hidden sm:block"></div>
           
           <input 
             type="date" 
-            className="field h-8 text-xs !bg-transparent border-none w-auto"
+            className="field h-11 text-xs !bg-transparent border-none w-auto"
             value={tableStartDate.toISOString().split('T')[0]}
             onChange={(e) => {
               if (e.target.value) setTableStartDate(new Date(e.target.value));
@@ -76,7 +76,7 @@ export default function OfficerAttendanceClient({ officer, initialRecords }) {
           <span className="text-slate-500 text-xs">-</span>
           <input 
             type="date" 
-            className="field h-8 text-xs !bg-transparent border-none w-auto"
+            className="field h-11 text-xs !bg-transparent border-none w-auto"
             value={tableEndDate.toISOString().split('T')[0]}
             onChange={(e) => {
               if (e.target.value) setTableEndDate(new Date(e.target.value));

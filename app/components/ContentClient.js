@@ -30,11 +30,12 @@ function CategoryBadge({ category }) {
   );
 }
 
-function AddContentForm() {
+function AddContentForm({ isAdmin = false, officers = [] }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [category, setCategory] = useState("Live");
+  const [officerId, setOfficerId] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
@@ -45,11 +46,12 @@ function AddContentForm() {
     fd.set("title", title);
     fd.set("url", url);
     fd.set("category", category);
+    if (isAdmin) fd.set("officer_id", officerId);
     const res = await createContentAction(null, fd);
     setPending(false);
     if (res?.error) { setError(res.error); return; }
     setError("");
-    setTitle(""); setUrl(""); setCategory("Live");
+    setTitle(""); setUrl(""); setCategory("Live"); setOfficerId("");
     router.refresh();
   };
 
@@ -75,9 +77,22 @@ function AddContentForm() {
         </div>
       </div>
 
-      <div>
-        <label className="label">Link (YouTube / TikTok / lainnya)</label>
-        <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="field" />
+      <div className={isAdmin ? "grid gap-4 sm:grid-cols-2" : ""}>
+        <div>
+          <label className="label">Link (YouTube / TikTok / lainnya)</label>
+          <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="field" />
+        </div>
+        {isAdmin && (
+          <div>
+            <label className="label">Personil (opsional)</label>
+            <select value={officerId} onChange={(e) => setOfficerId(e.target.value)} className="field">
+              <option value="">Umum (tanpa personil)</option>
+              {officers.map((o) => (
+                <option key={o.id} value={o.id}>{o.callsign} — {o.full_name}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {error && <p className="text-sm text-crimson-400">{error}</p>}
@@ -94,11 +109,12 @@ function AddContentForm() {
   );
 }
 
-function EditForm({ item, onDone }) {
+function EditForm({ item, onDone, isAdmin = false, officers = [] }) {
   const router = useRouter();
   const [title, setTitle] = useState(item.title || "");
   const [url, setUrl] = useState(item.url || "");
   const [category, setCategory] = useState(item.category || "Konten");
+  const [officerId, setOfficerId] = useState(item.officer_id || "");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
@@ -110,6 +126,7 @@ function EditForm({ item, onDone }) {
     fd.set("title", title);
     fd.set("url", url);
     fd.set("category", category);
+    if (isAdmin) fd.set("officer_id", officerId);
     const res = await updateContentAction(null, fd);
     setPending(false);
     if (res?.error) { setError(res.error); return; }
@@ -119,11 +136,23 @@ function EditForm({ item, onDone }) {
 
   return (
     <form onSubmit={submit} className="mt-4 space-y-3 rounded-lg border border-line bg-black/20 p-4">
-      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Judul" className="field" />
-      <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="field" />
-      <select value={category} onChange={(e) => setCategory(e.target.value)} className="field">
-        {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-      </select>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Judul" className="field" />
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className="field">
+          {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="field" />
+        {isAdmin && (
+          <select value={officerId} onChange={(e) => setOfficerId(e.target.value)} className="field">
+            <option value="">Umum (tanpa personil)</option>
+            {officers.map((o) => (
+              <option key={o.id} value={o.id}>{o.callsign} — {o.full_name}</option>
+            ))}
+          </select>
+        )}
+      </div>
       {error && <p className="text-sm text-crimson-400">{error}</p>}
       <div className="flex gap-2">
         <button type="submit" disabled={pending} className="btn btn-primary btn-sm">
@@ -138,7 +167,7 @@ function EditForm({ item, onDone }) {
   );
 }
 
-export default function ContentClient({ items = [], isAdmin = false }) {
+export default function ContentClient({ items = [], isAdmin = false, officers = [] }) {
   const router = useRouter();
   const [filter, setFilter] = useState("Semua");
   const [editingId, setEditingId] = useState(null);
@@ -165,7 +194,7 @@ export default function ContentClient({ items = [], isAdmin = false }) {
 
   return (
     <div className="space-y-6">
-      <AddContentForm />
+      <AddContentForm isAdmin={isAdmin} officers={officers} />
 
       <div className="card p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -179,7 +208,7 @@ export default function ContentClient({ items = [], isAdmin = false }) {
                 type="button"
                 onClick={() => setFilter(f)}
                 aria-pressed={filter === f}
-                className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors ${
+                className={`flex min-h-10 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors ${
                   filter === f
                     ? "border-crimson-500/40 bg-crimson-500/15 text-white"
                     : "border-line text-slate-400 hover:border-line-strong hover:text-white"
@@ -243,6 +272,7 @@ export default function ContentClient({ items = [], isAdmin = false }) {
                     <button
                       type="button"
                       onClick={() => setEditingId(editingId === item.id ? null : item.id)}
+                      aria-label="Edit content"
                       className="btn btn-ghost btn-sm"
                       title="Edit"
                     >
@@ -261,7 +291,7 @@ export default function ContentClient({ items = [], isAdmin = false }) {
                 </div>
 
                 {editingId === item.id && (
-                  <EditForm item={item} onDone={() => setEditingId(null)} />
+                  <EditForm item={item} onDone={() => setEditingId(null)} isAdmin={isAdmin} officers={officers} />
                 )}
               </li>
             ))}

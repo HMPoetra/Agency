@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
 import {
   LayoutDashboard, Users, FileText, Tag, Code2, Home,
-  LogOut, Shield, ClipboardList, Menu, X, MessageSquareQuote, Film
+  LogOut, Shield, ClipboardList, Menu, X, MessageSquareQuote, Film, ShoppingBag
 } from "lucide-react";
 import { useState } from "react";
 
@@ -19,14 +19,12 @@ const nav = [
   { href: "/admin/attendance",  label: "Absensi",    icon: ClipboardList },
   { href: "/admin/products",    label: "Script & Assets", icon: Code2 },
   { href: "/admin/content",     label: "Content",    icon: Film },
+  { href: "/admin/ala-carte",   label: "Ala Carte",  icon: ShoppingBag },
   { href: "/admin/reviews",     label: "Rating & Pesan", icon: MessageSquareQuote },
 ];
 
-export default function AdminSidebar() {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-
-  const SidebarContent = () => (
+function SidebarContent({ pathname, onNavigate }) {
+  return (
     <div className="flex h-full flex-col">
       {/* Brand */}
       <div className="border-b border-line px-6 py-5">
@@ -48,7 +46,7 @@ export default function AdminSidebar() {
               <li key={href}>
                 <Link
                   href={href}
-                  onClick={() => setOpen(false)}
+                  onClick={onNavigate}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                     isActive
                       ? "bg-crimson-500/15 border border-crimson-500/30 text-white"
@@ -78,6 +76,11 @@ export default function AdminSidebar() {
       </div>
     </div>
   );
+}
+
+export default function AdminSidebar() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -108,17 +111,17 @@ export default function AdminSidebar() {
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="absolute right-3 top-3 text-slate-500 hover:text-white"
+          className="absolute right-3 top-3 flex size-10 items-center justify-center rounded-lg text-slate-500 hover:text-white"
           aria-label="Tutup menu"
         >
           <X className="size-5" />
         </button>
-        <SidebarContent />
+        <SidebarContent pathname={pathname} onNavigate={() => setOpen(false)} />
       </aside>
 
       {/* Desktop sidebar */}
       <aside className="hidden w-56 flex-shrink-0 border-r border-line bg-[#080608] lg:block">
-        <SidebarContent />
+        <SidebarContent pathname={pathname} />
       </aside>
     </>
   );

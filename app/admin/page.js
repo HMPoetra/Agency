@@ -108,7 +108,8 @@ export default async function AdminDashboard() {
               Belum ada absensi hari ini.
             </p>
           ) : (
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm whitespace-nowrap">
               <thead>
                 <tr className="border-b border-line">
                   {["Personil", "Callsign", "Divisi", "Check-In", "Check-Out", "Status"].map((h) => (
@@ -147,6 +148,7 @@ export default async function AdminDashboard() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>

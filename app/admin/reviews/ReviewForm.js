@@ -1,30 +1,22 @@
 "use client";
 
-import { useState, useActionState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Pencil, Star } from "lucide-react";
 import { updateReviewAction } from "@/app/actions/admin";
 import { toast } from "sonner";
+import { useFormAction } from "@/app/hooks/useFormAction";
+import { useMounted } from "@/app/hooks/useMounted";
 
 export default function ReviewForm({ review }) {
   const [open, setOpen] = useState(false);
+  const mounted = useMounted();
   const action = updateReviewAction.bind(null, review.id);
-  const [state, formAction, pending] = useActionState(action, null);
-  const [mounted, setMounted] = useState(false);
+  const { handleSubmit, pending, error } = useFormAction(action, () => {
+    toast.success("Rating & Pesan berhasil diperbarui!");
+    setOpen(false);
+  });
   const [rating, setRating] = useState(review?.rating || 5);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (state?.success && open) {
-      toast.success("Rating & Pesan berhasil diperbarui!");
-      setOpen(false);
-    } else if (state?.error && open) {
-      toast.error(state.error);
-    }
-  }, [state, open]);
 
   return (
     <>
@@ -45,12 +37,12 @@ export default function ReviewForm({ review }) {
               <h2 className="font-orbitron text-lg font-bold text-white">
                 Edit Rating & Pesan
               </h2>
-              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setOpen(false)} className="flex size-10 items-center justify-center rounded-lg text-slate-400 hover:text-white" aria-label="Tutup">
                 <X className="size-5" />
               </button>
             </div>
 
-            <form action={formAction} className="p-6">
+            <form onSubmit={handleSubmit} className="p-6">
               <div className="grid gap-5">
                 <div>
                   <label className="label">Nama / Server</label>
@@ -65,9 +57,10 @@ export default function ReviewForm({ review }) {
                         key={star}
                         type="button"
                         onClick={() => setRating(star)}
-                        className={`transition-colors ${star <= rating ? "text-amber-400" : "text-slate-600 hover:text-amber-400/50"}`}
+                        aria-label={`Beri ${star} bintang`}
+                        className={`p-1 transition-colors ${star <= rating ? "text-amber-400" : "text-slate-600 hover:text-amber-400/50"}`}
                       >
-                        <Star className="size-8 fill-current" />
+                        <Star className="size-7 fill-current" />
                       </button>
                     ))}
                     <input type="hidden" name="rating" value={rating} />
@@ -92,8 +85,8 @@ export default function ReviewForm({ review }) {
                   </label>
                 </div>
 
-                {state?.error && (
-                  <p className="text-sm text-crimson-400">{state.error}</p>
+                {error && (
+                  <p className="text-sm text-crimson-400">{error}</p>
                 )}
 
                 <div className="mt-2 flex justify-end gap-3 border-t border-line pt-5">

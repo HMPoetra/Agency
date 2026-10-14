@@ -179,8 +179,16 @@
     transform: scale(0.97);
   }
 
+  /* Izinkan label tombol membungkus di layar sempit agar tidak meluber */
+  @media (max-width: 25rem) {
+    .btn {
+      white-space: normal;
+      text-align: center;
+    }
+  }
+
   .btn-sm {
-    min-height: 2.25rem;
+    min-height: 2.5rem;
     padding: 0.5rem 0.875rem;
     font-size: 0.6875rem;
   }

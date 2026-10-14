@@ -148,7 +148,7 @@ export default function HoursTableClient({ officers, attendance = [], isAdmin })
                     {editingId === o.id ? (
                       <div className="flex items-center gap-2">
                         <select
-                          className="field py-1 px-2 h-8 w-14 bg-black/40 text-center cursor-pointer"
+                          className="field py-1 px-2 h-11 w-14 bg-black/40 text-center cursor-pointer"
                           value={operation}
                           onChange={(e) => setOperation(e.target.value)}
                           disabled={loading}
@@ -158,7 +158,7 @@ export default function HoursTableClient({ officers, attendance = [], isAdmin })
                         </select>
                         <input
                           type="number"
-                          className="field py-1 px-2 h-8 w-16 text-center"
+                          className="field py-1 px-2 h-11 w-16 text-center"
                           value={inputHours}
                           onChange={(e) => setInputHours(e.target.value)}
                           disabled={loading}
@@ -167,7 +167,7 @@ export default function HoursTableClient({ officers, attendance = [], isAdmin })
                         <span className="text-slate-500">j</span>
                         <input
                           type="number"
-                          className="field py-1 px-2 h-8 w-16 text-center"
+                          className="field py-1 px-2 h-11 w-16 text-center"
                           value={inputMinutes}
                           onChange={(e) => setInputMinutes(e.target.value)}
                           disabled={loading}
