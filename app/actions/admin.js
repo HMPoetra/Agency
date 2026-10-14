@@ -103,6 +103,9 @@ const OfficerSchema = z.object({
   gender: z.string(),
   unit_task: z.string().optional(),
   notes: z.string().optional(),
+  live_url: z.string().optional(),
+  youtube_url: z.string().optional(),
+  tiktok_url: z.string().optional(),
   status: z.enum(["Active", "On-Duty", "Standby", "Inactive"]),
 });
 

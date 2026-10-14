@@ -99,6 +99,31 @@ export default function OfficerForm({ officer, divisions, ranks, mode }) {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
+                  <label className="label">Link YouTube</label>
+                  <input
+                    name="youtube_url"
+                    type="url"
+                    className="field"
+                    placeholder="https://youtube.com/..."
+                    defaultValue={officer?.youtube_url || (officer?.live_url?.includes("youtu") ? officer.live_url : "")}
+                  />
+                  <p className="mt-1 text-[10px] text-slate-500">Tampil di halaman Roster.</p>
+                </div>
+                <div>
+                  <label className="label">Link TikTok</label>
+                  <input
+                    name="tiktok_url"
+                    type="url"
+                    className="field"
+                    placeholder="https://tiktok.com/@..."
+                    defaultValue={officer?.tiktok_url || (officer?.live_url?.includes("tiktok") ? officer.live_url : "")}
+                  />
+                  <p className="mt-1 text-[10px] text-slate-500">Tampil di halaman Roster.</p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
                   <label className="label">Pangkat</label>
                   <select name="rank" multiple className="field min-h-[120px]" defaultValue={officer?.rank ? officer.rank.split(", ") : []} required>
                     {[...activeRanks].map((r) => <option key={r} value={r}>{r}</option>)}
@@ -107,10 +132,9 @@ export default function OfficerForm({ officer, divisions, ranks, mode }) {
                 </div>
                 <div>
                   <label className="label">Divisi</label>
-                  <select name="division" multiple className="field min-h-[120px]" defaultValue={officer?.division ? officer.division.split(", ") : ["All Division"]} required>
-                    <option value="All Division">All Division</option>
-                    {divisions?.filter(d => (d.name || d.id) !== "All Division").map(d => (
-                      <option key={d.id} value={d.name || d.id}>{d.name || d.id}</option>
+                  <select name="division" multiple className="field min-h-[120px]" defaultValue={officer?.division ? officer.division.split(", ") : ["DIV-ALL"]} required>
+                    {divisions?.map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
                   </select>
                   <p className="mt-1 text-[10px] text-slate-500">Tahan Ctrl/Cmd untuk memilih lebih dari 1</p>

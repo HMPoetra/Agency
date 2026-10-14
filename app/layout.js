@@ -40,7 +40,7 @@ export const metadata = {
 };
 
 // Halaman-halaman yang tidak pakai Navbar/Footer publik
-const NO_SHELL_PREFIXES = ["/admin", "/login", "/absensi", "/profile"];
+const NO_SHELL_PREFIXES = ["/admin", "/login", "/absensi", "/profile", "/content"];
 
 export default async function RootLayout({ children }) {
   const headersList = await headers();

@@ -1,5 +1,5 @@
 // app/admin/page.js — Dashboard Overview
-import { getDashboardSummary, getOfficers, getAttendance } from "@/lib/queries";
+import { getDashboardSummary, getOfficers, getAttendance, getDivisions } from "@/lib/queries";
 import { getSession } from "@/lib/auth";
 import {
   Users, FileText, Clock, TrendingUp,
@@ -7,11 +7,16 @@ import {
 } from "lucide-react";
 
 export default async function AdminDashboard() {
-  const [session, summary, recentAttendance] = await Promise.all([
+  const [session, summary, recentAttendance, divisions] = await Promise.all([
     getSession(),
     getDashboardSummary(),
     getAttendance({ limit: 100, todayOnly: true }),
+    getDivisions(),
   ]);
+
+  const divName = Object.fromEntries(divisions.map((d) => [d.id, d.name]));
+  const divisionLabel = (csv) =>
+    (csv ? csv.split(", ") : []).map((id) => divName[id] || id).join(", ") || "-";
 
   const o = summary.officers;
   const c = summary.contracts;
@@ -118,7 +123,7 @@ export default async function AdminDashboard() {
                   <tr key={rec.id} className="border-b border-line/50 last:border-0 hover:bg-white/[0.015] transition-colors">
                     <td className="px-4 py-3 text-slate-200">{rec.full_name}</td>
                     <td className="px-4 py-3 font-mono text-xs text-slate-400">{rec.callsign}</td>
-                    <td className="px-4 py-3 text-slate-400">{rec.division}</td>
+                    <td className="px-4 py-3 text-slate-400">{divisionLabel(rec.division)}</td>
                     <td className="px-4 py-3 font-mono text-crimson-400 whitespace-nowrap">
                       {new Date(rec.checked_in_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} {new Date(rec.checked_in_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false })} WIB
                     </td>

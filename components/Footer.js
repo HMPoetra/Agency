@@ -1,5 +1,10 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { Radio, Mail, MapPin } from "lucide-react";
 import CopsLogo from "./CopsLogo";
+
+const NO_SHELL_PREFIXES = ["/admin", "/login", "/absensi", "/profile", "/content"];
 
 const links = [
   { name: "Beranda Utama", href: "#home" },
@@ -21,6 +26,11 @@ const contacts = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (NO_SHELL_PREFIXES.some((p) => pathname.startsWith(p))) {
+    return null;
+  }
+
   return (
     <footer className="relative border-t border-line">
       <div
@@ -56,7 +66,7 @@ export default function Footer() {
               {links.map((link) => (
                 <li key={link.href}>
                   <a
-                    href={link.href}
+                    href={pathname === "/" ? link.href : `/${link.href}`}
                     className="group inline-flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-white"
                   >
                     <span

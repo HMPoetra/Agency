@@ -11,6 +11,10 @@ export const metadata = { title: "Personil — Admin COP-S" };
 export default async function OfficersPage() {
   const [officers, divisions, ranks] = await Promise.all([getOfficers(), getDivisions(), getRanks()]);
 
+  const divName = Object.fromEntries(divisions.map((d) => [d.id, d.name]));
+  const divisionLabel = (csv) =>
+    (csv ? csv.split(", ") : []).map((id) => divName[id] || id).join(", ") || "-";
+
   return (
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -55,7 +59,7 @@ export default async function OfficersPage() {
                   <td className="px-4 py-3 text-slate-300">{officer.rank}</td>
                   <td className="px-4 py-3">
                     <span className="rounded border px-2 py-0.5 font-mono text-[10px] border-crimson-500/30 bg-crimson-500/10 text-crimson-400">
-                      {officer.division}
+                      {divisionLabel(officer.division)}
                     </span>
                   </td>
                   <td className="px-4 py-3">

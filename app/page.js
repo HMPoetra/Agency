@@ -7,7 +7,8 @@ import {
 import HomeClient from "./HomeClient";
 
 export default async function HomePage() {
-  const [dbStats, dbPillars, dbDivisions, dbOfficers, dbContracts, dbPricing, dbProducts, dbReviews, dbContent] =
+  const { getContent } = await import("@/lib/queries");
+  const [dbStats, dbPillars, dbDivisions, dbOfficers, dbContracts, dbPricing, dbProducts, dbReviews, dbContent, dbLiveContent] =
     await Promise.all([
       getStats(),
       getPillars(),
@@ -18,6 +19,7 @@ export default async function HomePage() {
       getProducts(),
       getPublishedReviews(),
       getSiteContent(),
+      getContent({ onlyActive: true }),
     ]);
 
   const activeOfficers = dbOfficers.filter(o => o.status === 'Active').length;
@@ -68,8 +70,11 @@ export default async function HomePage() {
     division: o.division,
     status: o.status,
     gender: o.gender,
-    unitTask: o.unit_task,
+    unit_task: o.unit_task,
     notes: o.notes,
+    live_url: o.live_url,
+    youtube_url: o.youtube_url || (o.live_url?.includes("youtu") ? o.live_url : ""),
+    tiktok_url: o.tiktok_url || (o.live_url?.includes("tiktok") ? o.live_url : ""),
   }));
   const contractsData = dbContracts.map((c) => ({
     server: c.server_name,
@@ -120,6 +125,7 @@ export default async function HomePage() {
       productsData={productsData}
       reviewsData={reviewsData}
       content={dbContent}
+      liveContent={dbLiveContent}
     />
   );
 }

@@ -11,7 +11,7 @@ const RANKS = [
   "12. POLICE OFFICER", "13. CADET"
 ];
 
-export default function ProfileClient({ session, officer }) {
+export default function ProfileClient({ session, officer, divisions = [] }) {
   const [passState, passDispatch, passPending] = useActionState(updatePasswordAction, null);
   const [personalState, personalDispatch, personalPending] = useActionState(updatePersonalAction, null);
   const passFormRef = useRef(null);
@@ -61,7 +61,10 @@ export default function ProfileClient({ session, officer }) {
               </div>
               <div>
                 <label className="label">Divisi</label>
-                <input type="text" name="division" className="field" defaultValue={officer.division} required />
+                <select name="division" multiple className="field min-h-[120px]" defaultValue={officer.division ? officer.division.split(", ") : []} required>
+                  {divisions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+                <p className="mt-1 text-[10px] text-slate-500">Tahan Ctrl/Cmd untuk memilih lebih dari 1</p>
               </div>
             </div>
 
@@ -75,9 +78,31 @@ export default function ProfileClient({ session, officer }) {
                   <option value="Lainnya">Lainnya</option>
                 </select>
               </div>
+
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="label">Unit Task</label>
-                <input type="text" name="unit_task" className="field" defaultValue={officer.unit_task === "-" ? "" : officer.unit_task} placeholder="Boleh dikosongkan..." />
+                <label className="label">Link YouTube</label>
+                <input
+                  type="url"
+                  name="youtube_url"
+                  className="field"
+                  defaultValue={officer.youtube_url || (officer.live_url?.includes("youtu") ? officer.live_url : "")}
+                  placeholder="https://youtube.com/@channel atau live/video"
+                />
+                <p className="mt-1 text-[10px] text-slate-500">Tampil di halaman Roster.</p>
+              </div>
+              <div>
+                <label className="label">Link TikTok</label>
+                <input
+                  type="url"
+                  name="tiktok_url"
+                  className="field"
+                  defaultValue={officer.tiktok_url || (officer.live_url?.includes("tiktok") ? officer.live_url : "")}
+                  placeholder="https://tiktok.com/@user"
+                />
+                <p className="mt-1 text-[10px] text-slate-500">Tampil di halaman Roster.</p>
               </div>
             </div>
 

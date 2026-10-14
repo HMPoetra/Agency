@@ -31,7 +31,10 @@ function toJakartaDateKey(date) {
   return `${p.y}-${p.mo}-${p.d}`;
 }
 
-export default function AttendanceClient({ initialRecords, officers }) {
+export default function AttendanceClient({ initialRecords, officers, divisions = [] }) {
+  const divName = Object.fromEntries(divisions.map((d) => [d.id, d.name]));
+  const divisionLabel = (csv) =>
+    (csv ? csv.split(", ") : []).map((id) => divName[id] || id).join(", ") || "-";
   const [records, setRecords] = useState(initialRecords);
   const [editingRec, setEditingRec] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -93,7 +96,7 @@ export default function AttendanceClient({ initialRecords, officers }) {
               <tr key={rec.id} className="border-b border-line/50 last:border-0 hover:bg-white/[0.015] transition-colors">
                 <td className="px-4 py-3 text-slate-200 font-medium">{rec.full_name}</td>
                 <td className="px-4 py-3 font-mono text-xs text-slate-400">{rec.callsign}</td>
-                <td className="px-4 py-3 text-slate-400">{rec.division}</td>
+                <td className="px-4 py-3 text-slate-400">{divisionLabel(rec.division)}</td>
                 <td className="px-4 py-3 text-slate-300">
                   {new Date(rec.checked_in_at).toLocaleDateString("id-ID", {
                     timeZone: "Asia/Jakarta",

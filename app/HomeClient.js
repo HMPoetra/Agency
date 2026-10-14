@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import ReviewInbox from "./components/ReviewInbox";
+import ContentPublicSection from "./components/ContentPublicSection";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
@@ -24,6 +25,7 @@ import {
   Tag,
   Target,
   Users,
+  ExternalLink,
 } from "lucide-react";
 import RadarBackground from "@/components/RadarBackground";
 import CopsLogo from "@/components/CopsLogo";
@@ -381,12 +383,13 @@ const products = [
    PAGE
    ══════════════════════════════════════════ */
 
-export default function HomeClient({ statsData, pillarsData, divisionsData, officersData, contractsData, pricingData, productsData, reviewsData, content }) {
+export default function HomeClient({ statsData, pillarsData, divisionsData, officersData, contractsData, pricingData, productsData, reviewsData, content, liveContent = [] }) {
   return (
     <>
       <HeroSection stats={statsData} pillars={pillarsData} contracts={contractsData} content={content} />
       <ProfileSection content={content} />
       <DivisionSection divisions={divisionsData} />
+      <ContentPublicSection items={liveContent} />
       <RosterSection officers={officersData} divisions={divisionsData} />
       <PricingSection contracts={contractsData} pricing={pricingData} />
       <ScriptsSection products={productsData} />
@@ -728,7 +731,8 @@ function RosterSection({ officers, divisions }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
 
-  const divisionFilters = ["All", ...divs.map((d) => d.name)];
+  const divName = { "DIV-ALL": "All Division", ...Object.fromEntries(divs.map((d) => [d.id, d.name])) };
+  const divisionFilters = [{ id: "All", name: "All" }, ...divs.map((d) => ({ id: d.id, name: d.name }))];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -740,7 +744,7 @@ function RosterSection({ officers, divisions }) {
         officer.id.toLowerCase().includes(q);
 
       const oDivs = officer.division ? officer.division.split(", ") : [];
-      const filterMatch = filter === "All" || oDivs.includes(filter) || oDivs.includes("All Division");
+      const filterMatch = filter === "All" || oDivs.includes(filter) || oDivs.includes("DIV-ALL");
 
       return hit && filterMatch;
     });
@@ -750,17 +754,19 @@ function RosterSection({ officers, divisions }) {
 
   const divisionCount = [
     {
+      id: "DIV-ALL",
       division: "All Division",
       count: officersData.filter((o) => {
         const oDivs = o.division ? o.division.split(", ") : [];
-        return oDivs.includes("All Division");
+        return oDivs.includes("DIV-ALL");
       }).length,
     },
     ...divs.map((d) => ({
+      id: d.id,
       division: d.name,
       count: officersData.filter((o) => {
         const oDivs = o.division ? o.division.split(", ") : [];
-        return oDivs.includes(d.name) || oDivs.includes("All Division");
+        return oDivs.includes(d.id) || oDivs.includes("DIV-ALL");
       }).length,
     }))
   ]; return (
@@ -806,16 +812,16 @@ function RosterSection({ officers, divisions }) {
               >
                 {divisionFilters.map((f) => (
                   <button
-                    key={f}
+                    key={f.id}
                     type="button"
-                    onClick={() => setFilter(f)}
-                    aria-pressed={filter === f}
-                    className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${filter === f
+                    onClick={() => setFilter(f.id)}
+                    aria-pressed={filter === f.id}
+                    className={`flex min-h-9 items-center rounded-full border px-4 text-xs uppercase tracking-[0.1em] transition-colors active:scale-95 ${filter === f.id
                       ? "border-crimson-500/40 bg-crimson-500/15 text-white"
                       : "border-line text-slate-400 hover:border-line-strong hover:text-white"
                       }`}
                   >
-                    {f}
+                    {f.name}
                   </button>
                 ))}
               </div>
@@ -845,11 +851,11 @@ function RosterSection({ officers, divisions }) {
               </p>
 
               <ul className="mt-6 space-y-3">
-                {divisionCount.map(({ division, count }) => (
-                  <li key={division}>
+                {divisionCount.map(({ id, division, count }) => (
+                  <li key={id}>
                     <button
                       type="button"
-                      onClick={() => setFilter(division)}
+                      onClick={() => setFilter(id)}
                       className="group flex w-full items-center justify-between rounded-lg border border-line px-3.5 py-2.5 transition-colors hover:border-line-strong"
                     >
                       <span className="text-sm text-slate-300">{division}</span>
@@ -875,7 +881,7 @@ function RosterSection({ officers, divisions }) {
           <AnimatePresence mode="popLayout">
             {filtered.map((officer) => (
               <RevealItem as="li" key={officer.id} layout>
-                <OfficerCard officer={officer} />
+                <OfficerCard officer={officer} divName={divName} />
               </RevealItem>
             ))}
           </AnimatePresence>
@@ -1353,7 +1359,7 @@ function CtaSection() {
    SHARED
    ══════════════════════════════════════════ */
 
-function SectionImage({ src, opacity = 0.16, position = "object-center" }) {
+export function SectionImage({ src, opacity = 0.16, position = "object-center" }) {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0">
       <Image
@@ -1370,7 +1376,7 @@ function SectionImage({ src, opacity = 0.16, position = "object-center" }) {
   );
 }
 
-function SectionHead({ index, label, title, lede }) {
+export function SectionHead({ index, label, title, lede }) {
   return (
     <div className="max-w-2xl">
       {(index || label) && (
@@ -1487,9 +1493,57 @@ function DivisionBar({ ratio }) {
   );
 }
 
-function OfficerCard({ officer }) {
+function YoutubeIcon({ className = "size-3.5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+    </svg>
+  );
+}
+
+function TiktokIcon({ className = "size-3.5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.47 6.3 6.3 0 0 0 1.86-4.46V8.77a8.18 8.18 0 0 0 4.74 1.5V6.82a4.85 4.85 0 0 1-.83-.13z"/>
+    </svg>
+  );
+}
+
+function getEmbed(url) {
+  if (!url) return null;
+  const u = url.trim();
+  const yt = u.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|live\/|shorts\/))([\w-]{11})/);
+  if (yt) return { platform: "YouTube", embedUrl: `https://www.youtube.com/embed/${yt[1]}`, aspect: "16 / 9" };
+  const tt = u.match(/tiktok\.com\/(?:@[\w.-]+\/video\/|v\/)(\d+)/) || u.match(/tiktok\.com\/.+\/video\/(\d+)/);
+  if (tt) return { platform: "TikTok", embedUrl: `https://www.tiktok.com/embed/v2/${tt[1]}`, aspect: "9 / 16" };
+  const platform = u.includes("tiktok") ? "TikTok" : (u.includes("youtube") || u.includes("youtu.be") ? "YouTube" : "Stream");
+  return { platform, embedUrl: null, aspect: "16 / 9" };
+}
+
+function LiveDot() {
+  return (
+    <span className="relative mr-1.5 flex h-2 w-2">
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-crimson-400 opacity-75" />
+      <span className="relative inline-flex h-2 w-2 rounded-full bg-crimson-500" />
+    </span>
+  );
+}
+
+function OfficerCard({ officer, divName = {} }) {
   const tone = accent[officer.divTag === "DIV-A" ? "rose" : "blue"];
   const monogram = officer.rank.split(" ")[0].slice(0, 3).toUpperCase();
+
+  const youtubeUrl = officer.youtube_url || (officer.live_url?.includes("youtu") ? officer.live_url : "");
+  const tiktokUrl = officer.tiktok_url || (officer.live_url?.includes("tiktok") ? officer.live_url : "");
+  const ytEmbed = youtubeUrl ? getEmbed(youtubeUrl) : null;
+  const ttEmbed = tiktokUrl ? getEmbed(tiktokUrl) : null;
+  const hasEmbed = Boolean(ytEmbed?.embedUrl || ttEmbed?.embedUrl);
+
+  const [showLive, setShowLive] = useState(false);
+  const divLabel =
+    (officer.division ? officer.division.split(", ") : [])
+      .map((id) => divName[id] || id)
+      .join(", ") || "-";
 
   return (
     <article className="card group flex h-full flex-col p-5">
@@ -1532,7 +1586,7 @@ function OfficerCard({ officer }) {
       <dl className="mt-5 space-y-0 border-t border-line text-sm">
         {[
           ["Pangkat", officer.rank],
-          ["Divisi", officer.division],
+          ["Divisi", divLabel],
           ["JK", officer.gender],
           ["Keterangan", officer.notes],
         ].map(([key, value], i, rows) => (
@@ -1555,9 +1609,91 @@ function OfficerCard({ officer }) {
         ))}
       </dl>
 
+      {/* Media Sosial: YouTube & TikTok */}
+      {(youtubeUrl || tiktokUrl) && (
+        <div className="mt-4 border-t border-line pt-3">
+          <p className="text-[10px] uppercase tracking-[0.12em] text-slate-500 font-mono mb-2">
+            Media Sosial
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {youtubeUrl && (
+              <a
+                href={youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs font-medium text-red-400 transition-colors hover:border-red-500/50 hover:bg-red-500/20 hover:text-white"
+                title="Buka YouTube"
+              >
+                <YoutubeIcon className="size-3.5 fill-current" />
+                <span>YouTube</span>
+                <ExternalLink className="size-2.5 opacity-60" />
+              </a>
+            )}
+            {tiktokUrl && (
+              <a
+                href={tiktokUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-pink-500/30 bg-pink-500/10 px-2.5 py-1.5 text-xs font-medium text-pink-400 transition-colors hover:border-pink-500/50 hover:bg-pink-500/20 hover:text-white"
+                title="Buka TikTok"
+              >
+                <TiktokIcon className="size-3.5 fill-current" />
+                <span>TikTok</span>
+                <ExternalLink className="size-2.5 opacity-60" />
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Preview Live / Embed Video jika tersedia */}
+      {hasEmbed && (
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={() => setShowLive((v) => !v)}
+            aria-expanded={showLive}
+            className="btn btn-ghost btn-xs w-full border-crimson-500/30 text-[11px]"
+          >
+            <LiveDot />
+            {showLive ? "Tutup Preview" : "Tonton Live / Preview"}
+          </button>
+          {showLive && (
+            <div className="mt-2.5 space-y-2">
+              {ytEmbed?.embedUrl && (
+                <div className="overflow-hidden rounded-lg border border-line bg-black">
+                  <iframe
+                    src={ytEmbed.embedUrl}
+                    title={`YouTube ${officer.name}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    loading="lazy"
+                    style={{ aspectRatio: ytEmbed.aspect }}
+                    className="w-full"
+                  />
+                </div>
+              )}
+              {ttEmbed?.embedUrl && (
+                <div className="overflow-hidden rounded-lg border border-line bg-black flex justify-center">
+                  <iframe
+                    src={ttEmbed.embedUrl}
+                    title={`TikTok ${officer.name}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    loading="lazy"
+                    style={{ aspectRatio: ttEmbed.aspect }}
+                    className="aspect-[9/16] w-full max-w-xs"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       <a
         href="#kontak"
-        className="btn btn-ghost btn-sm mt-5 w-full opacity-0 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 sm:opacity-100"
+        className="btn btn-ghost btn-sm mt-auto pt-4 w-full opacity-0 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 sm:opacity-100"
       >
         Minta Profil Lengkap
       </a>

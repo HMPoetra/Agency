@@ -2,69 +2,128 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import CopsLogo from "./CopsLogo";
 
+const NO_SHELL_PREFIXES = ["/admin", "/login", "/absensi", "/profile", "/content"];
+
 const navItems = [
   { name: "Beranda", href: "#home" },
   { name: "Unit Ops", href: "#divisions" },
+  { name: "Content", href: "#content" },
   { name: "Roster", href: "#roster" },
   { name: "Harga & Kontak", href: "#pricing" },
   { name: "Script & Assets", href: "#scripts" },
 ];
 
-const sectionIds = [
-  "home",
-  "about",
-  "profil",
-  "divisions",
-  "roster",
-  "pricing",
-  "scripts",
-];
-
 export default function Navbar() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("home");
 
+  // Jika di halaman portal/admin/auth, sembunyikan Navbar publik
+  const isHidden = NO_SHELL_PREFIXES.some((p) => pathname?.startsWith(p));
+
+  // Detect scroll offset for navbar background
   useEffect(() => {
-    const sections = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter(Boolean);
+    if (isHidden) return;
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHidden]);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const hit = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (hit) setActive(hit.target.id);
-      },
-      { rootMargin: "-20% 0px -60% 0px", threshold: [0, 0.25, 0.5] },
-    );
+  // Robust Scroll Spy untuk mendeteksi posisi section saat ini
+  useEffect(() => {
+    if (isHidden || pathname !== "/") return;
 
-    sections.forEach((el) => observer.observe(el));
+    const navSectionIds = navItems.map((item) => item.href.replace(/^.*#/, ""));
 
-    const sentinel = new IntersectionObserver(
-      ([e]) => setScrolled(!e.isIntersecting),
-      { threshold: 0 },
-    );
-    const bar = document.getElementById("nav-sentinel");
-    if (bar) sentinel.observe(bar);
+    const onScroll = () => {
+      // 1. Jika di paling atas halaman
+      if (window.scrollY < 80) {
+        setActive("home");
+        return;
+      }
+
+      // 2. Jika di paling bawah halaman, aktifkan item terakhir
+      const scrollBottom = window.innerHeight + window.scrollY;
+      const docHeight = document.documentElement.scrollHeight;
+      if (scrollBottom >= docHeight - 80) {
+        setActive(navSectionIds[navSectionIds.length - 1]);
+        return;
+      }
+
+      // 3. Tentukan section aktif berdasarkan posisi rect.top
+      const offset = 140;
+      let current = navSectionIds[0];
+
+      for (const id of navSectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= offset) {
+            current = id;
+          }
+        }
+      }
+
+      setActive(current);
+    };
+
+    onScroll();
+
+    let ticking = false;
+    const scrollListener = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          onScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", scrollListener, { passive: true });
+    window.addEventListener("resize", scrollListener, { passive: true });
 
     return () => {
-      observer.disconnect();
-      sentinel.disconnect();
+      window.removeEventListener("scroll", scrollListener);
+      window.removeEventListener("resize", scrollListener);
     };
-  }, []);
+  }, [isHidden, pathname]);
 
+  // Tutup menu mobile dengan tombol Escape
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e) => e.key === "Escape" && setIsOpen(false);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen]);
+
+  if (isHidden) {
+    return null;
+  }
+
+  const handleNavClick = (e, href) => {
+    const id = href.replace(/^.*#/, "");
+    setActive(id);
+    setIsOpen(false);
+
+    if (pathname === "/") {
+      e.preventDefault();
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+        window.history.pushState(null, "", `#${id}`);
+      }
+    }
+  };
 
   return (
     <>
@@ -86,8 +145,9 @@ export default function Navbar() {
       >
         <div className="wrap">
           <div className="flex h-16 items-center justify-between">
-            <a
-              href="#home"
+            <Link
+              href="/#home"
+              onClick={(e) => handleNavClick(e, "#home")}
               className="flex items-center gap-3"
               aria-label="COP-s, ke beranda"
             >
@@ -100,16 +160,20 @@ export default function Navbar() {
                   Cops On Supply
                 </span>
               </span>
-            </a>
+            </Link>
 
             <nav aria-label="Navigasi utama" className="hidden lg:block">
               <ul className="flex items-center gap-1 rounded-full border border-line bg-white/[0.02] p-1">
                 {navItems.map((item) => {
-                  const isActive = active === item.href.slice(1);
+                  const targetId = item.href.slice(1);
+                  const isActive = active === targetId;
+                  const targetUrl = pathname === "/" ? item.href : `/${item.href}`;
+
                   return (
                     <li key={item.href}>
                       <a
-                        href={item.href}
+                        href={targetUrl}
+                        onClick={(e) => handleNavClick(e, item.href)}
                         aria-current={isActive ? "true" : undefined}
                         className={`relative block rounded-full px-3.5 py-1.5 text-xs tracking-wide transition-colors ${
                           isActive
@@ -140,7 +204,11 @@ export default function Navbar() {
               <Link href="/login" className="btn btn-ghost btn-sm">
                 Login
               </Link>
-              <a href="#pricing" className="btn btn-primary btn-sm">
+              <a
+                href={pathname === "/" ? "#pricing" : "/#pricing"}
+                onClick={(e) => handleNavClick(e, "#pricing")}
+                className="btn btn-primary btn-sm"
+              >
                 Sewa
                 <ArrowUpRight className="size-3.5" />
               </a>
@@ -171,12 +239,15 @@ export default function Navbar() {
               <nav aria-label="Navigasi mobile" className="wrap py-4">
                 <ul className="flex flex-col gap-1">
                   {navItems.map((item) => {
-                    const isActive = active === item.href.slice(1);
+                    const targetId = item.href.slice(1);
+                    const isActive = active === targetId;
+                    const targetUrl = pathname === "/" ? item.href : `/${item.href}`;
+
                     return (
                       <li key={item.href}>
                         <a
-                          href={item.href}
-                          onClick={() => setIsOpen(false)}
+                          href={targetUrl}
+                          onClick={(e) => handleNavClick(e, item.href)}
                           aria-current={isActive ? "true" : undefined}
                           className={`flex min-h-11 items-center rounded-lg px-3.5 py-2.5 text-sm uppercase tracking-[0.12em] transition-colors ${
                             isActive
@@ -192,8 +263,8 @@ export default function Navbar() {
                 </ul>
                 <div className="mt-4 flex flex-col gap-2">
                   <a
-                    href="#pricing"
-                    onClick={() => setIsOpen(false)}
+                    href={pathname === "/" ? "#pricing" : "/#pricing"}
+                    onClick={(e) => handleNavClick(e, "#pricing")}
                     className="btn btn-primary w-full"
                   >
                     Lihat Harga

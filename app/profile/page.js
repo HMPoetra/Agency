@@ -1,6 +1,6 @@
 // app/profile/page.js
 import { requireAuth } from "@/lib/auth";
-import { getOfficerById } from "@/lib/queries";
+import { getOfficerById, getDivisions } from "@/lib/queries";
 import ProfileClient from "./ProfileClient";
 import { logoutAction } from "@/app/actions/auth";
 import { LogOut, ArrowLeft } from "lucide-react";
@@ -15,6 +15,7 @@ export default async function ProfilePage() {
   if (session.officer_id) {
     officer = await getOfficerById(session.officer_id);
   }
+  const divisions = await getDivisions();
 
   return (
     <div className="min-h-screen bg-night">
@@ -44,7 +45,7 @@ export default async function ProfilePage() {
       </header>
 
       <div className="wrap py-10">
-        <ProfileClient session={session} officer={officer} />
+        <ProfileClient session={session} officer={officer} divisions={divisions} />
       </div>
     </div>
   );

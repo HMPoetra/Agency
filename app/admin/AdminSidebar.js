@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
 import {
   LayoutDashboard, Users, FileText, Tag, Code2, Home,
-  LogOut, Shield, ClipboardList, Menu, X, MessageSquareQuote
+  LogOut, Shield, ClipboardList, Menu, X, MessageSquareQuote, Film
 } from "lucide-react";
 import { useState } from "react";
 
@@ -18,6 +18,7 @@ const nav = [
   { href: "/admin/contracts",   label: "Harga & Kontrak", icon: FileText },
   { href: "/admin/attendance",  label: "Absensi",    icon: ClipboardList },
   { href: "/admin/products",    label: "Script & Assets", icon: Code2 },
+  { href: "/admin/content",     label: "Content",    icon: Film },
   { href: "/admin/reviews",     label: "Rating & Pesan", icon: MessageSquareQuote },
 ];
 
