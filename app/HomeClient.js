@@ -685,15 +685,10 @@ function DivisionSection({ divisions }) {
                   </div>
 
                   <div className="flex-1 p-6 sm:p-7 flex flex-col">
-                    <Schematic tone={tone} label={div.unit || "General"} photoUrl={div.photo_url} />
+                    <Schematic tone={tone} label={div.tag || div.name} photoUrl={div.photo_url} />
 
                     <h3 className="mt-6 font-rajdhani text-2xl font-bold text-white">
                       {div.name}
-                      {div.unit && (
-                        <span className="ml-2 font-sans text-sm font-normal text-slate-500">
-                          {div.unit}
-                        </span>
-                      )}
                     </h3>
                     <p className="mt-2.5 text-sm leading-relaxed text-slate-400">
                       {div.description}
