@@ -50,6 +50,7 @@ export default async function RootLayout({ children }) {
   return (
     <html
       lang="id"
+      data-scroll-behavior="smooth"
       className={`${inter.variable} ${orbitron.variable} ${rajdhani.variable}`}
     >
       <body className="min-h-screen flex flex-col">

@@ -31,6 +31,7 @@ import RadarBackground from "@/components/RadarBackground";
 import CopsLogo from "@/components/CopsLogo";
 import TypeTitle from "@/components/TypeTitle";
 import CountUp from "@/components/CountUp";
+import AlaCarteConfigurator from "@/app/components/AlaCarteConfigurator";
 import { Reveal, RevealItem } from "@/components/Reveal";
 
 const DISCORD = "https://discord.gg/HWZDKJAJh";
@@ -385,7 +386,7 @@ const products = [
    PAGE
    ══════════════════════════════════════════ */
 
-export default function HomeClient({ statsData, pillarsData, divisionsData, officersData, contractsData, pricingData, productsData, reviewsData, content, liveContent = [], alaCarteData = [] }) {
+export default function HomeClient({ statsData, pillarsData, divisionsData, officersData, contractsData, pricingData, productsData, reviewsData, content, liveContent = [], alaCarteData = [], alaCarteRanksData = [] }) {
   return (
     <>
       <HeroSection stats={statsData} pillars={pillarsData} contracts={contractsData} content={content} />
@@ -393,7 +394,7 @@ export default function HomeClient({ statsData, pillarsData, divisionsData, offi
       <DivisionSection divisions={divisionsData} />
       <ContentPublicSection items={liveContent} />
       <RosterSection officers={officersData} divisions={divisionsData} />
-      <PricingSection contracts={contractsData} pricing={pricingData} alaCarte={alaCarteData} />
+      <PricingSection contracts={contractsData} pricing={pricingData} alaCarte={alaCarteData} alaCarteRanks={alaCarteRanksData} />
       <ScriptsSection products={productsData} />
       <ReviewInbox reviews={reviewsData} />
       <CtaSection />
@@ -901,7 +902,7 @@ function RosterSection({ officers, divisions }) {
 
 /* ─── 05 Harga & Kontak ─── */
 
-function PricingSection({ contracts, pricing, alaCarte = [] }) {
+function PricingSection({ contracts, pricing, alaCarte = [], alaCarteRanks = [] }) {
   const activeContracts = contracts ?? [];
   const pricingTiers = pricing ?? [];
   return (
@@ -940,6 +941,7 @@ function PricingSection({ contracts, pricing, alaCarte = [] }) {
                           src={contract.photo_url}
                           alt={`Server ${contract.server}`}
                           fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover opacity-80"
                         />
                       </div>
@@ -1114,7 +1116,7 @@ function PricingSection({ contracts, pricing, alaCarte = [] }) {
           </div>
         </div>
 
-        <AlaCarteBlock items={alaCarte} />
+        <AlaCarteBlock items={alaCarte} ranks={alaCarteRanks} />
       </div>
     </section>
   );
@@ -1164,11 +1166,9 @@ function MouCta() {
 
 /* ─── 05b Ala Carte ─── */
 
-function AlaCarteBlock({ items = [] }) {
-  const list = items ?? [];
-  if (items === null || items === undefined || items.length === 0) return null;
+function AlaCarteBlock({ items = [], ranks = [] }) {
   return (
-    <div className="mt-16">
+    <div id="ala-carte" className="mt-16 scroll-mt-24">
       <div className="flex items-center gap-2">
         <Tag className="size-4 text-crimson-400" aria-hidden="true" />
         <h3 className="font-rajdhani text-lg font-bold text-white">
@@ -1176,39 +1176,11 @@ function AlaCarteBlock({ items = [] }) {
         </h3>
       </div>
       <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-400">
-        Paket satuan per divisi — pilih hanya yang server Anda butuhkan, tanpa
-        terikat kontrak penuh.
+        Rakit tim lepas sesuai kebutuhan server Anda — pilih divisi, geser jumlah
+        personil, dan tambahkan jabatan khusus. Harga dihitung otomatis.
       </p>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
-          <div key={item.id} className="card flex flex-col p-5">
-            <div className="flex items-center justify-between gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">
-                {item.division_tag || item.division_id}
-              </span>
-              <span className="flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-[11px] text-slate-300">
-                <Users className="size-3.5 text-crimson-400" aria-hidden="true" />
-                {item.player_count} pemain
-              </span>
-            </div>
-            <h3 className="mt-3 font-rajdhani text-lg font-bold text-white">
-              {item.name || item.division_name}
-            </h3>
-            {item.description && (
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
-                {item.description}
-              </p>
-            )}
-            <p className="mt-4 font-orbitron text-xl font-bold text-white">
-              <CountUp value={Number(item.price_idr) || 0} prefix="Rp " />
-            </p>
-            <a href="#kontak" className="btn btn-ghost btn-sm mt-4">
-              Pesan Paket <ArrowUpRight className="size-3.5" />
-            </a>
-          </div>
-        ))}
-      </div>
+      <AlaCarteConfigurator items={items} ranks={ranks} />
     </div>
   );
 }
@@ -1476,7 +1448,7 @@ function Schematic({ tone, label, photoUrl }) {
     <div className="relative mt-6 overflow-hidden rounded-xl border border-white/8 bg-[#100a0a] p-4 h-[232px] flex flex-col justify-center">
       {photoUrl ? (
         <div className="absolute inset-0 z-0">
-          <img src={photoUrl} alt={label} className="w-full h-full object-cover opacity-60 mix-blend-luminosity" />
+          <Image src={photoUrl} alt={label} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover opacity-60 mix-blend-luminosity" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#100a0a] via-[#100a0a]/30 to-transparent" />
         </div>
       ) : (

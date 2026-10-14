@@ -16,6 +16,7 @@ import {
   updateReview, deleteReview, toggleReviewPublish,
   updateSiteContent, replaceStats, replacePillars,
   createAlaCarte, updateAlaCarte, setAlaCarteActive, deleteAlaCarte, nextAlaCarteId,
+  createAlaCarteRank, updateAlaCarteRank, setAlaCarteRankActive, deleteAlaCarteRank, nextAlaCarteRankId,
 } from "@/lib/queries";
 import { processImageUrl } from "@/lib/upload";
 
@@ -597,6 +598,7 @@ function parseAlaCarte(fd) {
     name: (fd.get("name") || "").toString().trim(),
     description: (fd.get("description") || "").toString().trim(),
     price_idr: Number(fd.get("price_idr")) || 0,
+    price_per_person: Number(fd.get("price_per_person")) || 0,
     sort_order: Number(fd.get("sort_order")) || 0,
     is_active: fd.get("is_active") === "on",
   };
@@ -641,6 +643,60 @@ export async function setAlaCarteActiveAction(id, isActive) {
 export async function deleteAlaCarteAction(id) {
   await requireAdmin();
   await deleteAlaCarte(id);
+  revalidatePath("/admin/ala-carte");
+  revalidatePath("/");
+}
+
+/* ── ALA CARTE RANKS (jabatan) ── */
+function parseAlaCarteRank(fd) {
+  return {
+    name: (fd.get("name") || "").toString().trim(),
+    description: (fd.get("description") || "").toString().trim(),
+    price_idr: Number(fd.get("price_idr")) || 0,
+    sort_order: Number(fd.get("sort_order")) || 0,
+    is_active: fd.get("is_active") === "on",
+  };
+}
+
+export async function createAlaCarteRankAction(prevState, formData) {
+  await requireAdmin();
+  const data = parseAlaCarteRank(formData);
+  if (!data.name) return { error: "Nama jabatan wajib diisi." };
+  try {
+    data.id = await nextAlaCarteRankId();
+    await createAlaCarteRank(data);
+    revalidatePath("/admin/ala-carte");
+    revalidatePath("/");
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+export async function updateAlaCarteRankAction(id, prevState, formData) {
+  await requireAdmin();
+  const data = parseAlaCarteRank(formData);
+  if (!data.name) return { error: "Nama jabatan wajib diisi." };
+  try {
+    await updateAlaCarteRank(id, data);
+    revalidatePath("/admin/ala-carte");
+    revalidatePath("/");
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+export async function setAlaCarteRankActiveAction(id, isActive) {
+  await requireAdmin();
+  await setAlaCarteRankActive(id, isActive);
+  revalidatePath("/admin/ala-carte");
+  revalidatePath("/");
+}
+
+export async function deleteAlaCarteRankAction(id) {
+  await requireAdmin();
+  await deleteAlaCarteRank(id);
   revalidatePath("/admin/ala-carte");
   revalidatePath("/");
 }

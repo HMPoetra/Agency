@@ -20,16 +20,17 @@ export default function CountUp({
   duration = 1.5,
   className = "",
 }) {
+  const target = Number(value) || 0;
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.5 });
   const reduced = useReducedMotion();
-  const count = useMotionValue(reduced ? value : 0);
+  const count = useMotionValue(reduced ? target : 0);
 
   useEffect(() => {
     if (!inView || reduced) return;
-    const controls = animate(count, value, { duration, ease: EASE });
+    const controls = animate(count, target, { duration, ease: EASE });
     return () => controls.stop();
-  }, [inView, reduced, count, value, duration]);
+  }, [inView, reduced, count, target, duration]);
 
   const text = useTransform(count, (v) => {
     const n = decimals
@@ -39,7 +40,7 @@ export default function CountUp({
   });
 
   return (
-    <motion.span ref={ref} className={className} aria-label={`${prefix}${value}${suffix}`}>
+    <motion.span ref={ref} className={className} aria-label={`${prefix}${target}${suffix}`}>
       {text}
     </motion.span>
   );

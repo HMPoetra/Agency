@@ -15,6 +15,7 @@ const navItems = [
   { name: "Content", href: "#content" },
   { name: "Roster", href: "#roster" },
   { name: "Harga & Kontak", href: "#pricing" },
+  { name: "Ala Carte", href: "#ala-carte" },
   { name: "Script & Assets", href: "#scripts" },
 ];
 

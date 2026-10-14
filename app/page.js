@@ -2,13 +2,13 @@
 import {
   getStats, getPillars, getDivisions, getOfficersWithHours,
   getContracts, getPricingTiers, getProducts, getPublishedReviews,
-  getSiteContent, getAlaCarte
+  getSiteContent, getAlaCarte, getAlaCarteRanks
 } from "@/lib/queries";
 import HomeClient from "./HomeClient";
 
 export default async function HomePage() {
   const { getContent } = await import("@/lib/queries");
-  const [dbStats, dbPillars, dbDivisions, dbOfficers, dbContracts, dbPricing, dbProducts, dbReviews, dbContent, dbLiveContent, dbAlaCarte] =
+  const [dbStats, dbPillars, dbDivisions, dbOfficers, dbContracts, dbPricing, dbProducts, dbReviews, dbContent, dbLiveContent, dbAlaCarte, dbAlaCarteRanks] =
     await Promise.all([
       getStats(),
       getPillars(),
@@ -21,6 +21,7 @@ export default async function HomePage() {
       getSiteContent(),
       getContent({ onlyActive: true }),
       getAlaCarte({ onlyActive: true }),
+      getAlaCarteRanks({ onlyActive: true }),
     ]);
 
   const activeOfficers = dbOfficers.filter(o => o.status === 'Active').length;
@@ -128,6 +129,7 @@ export default async function HomePage() {
       content={dbContent}
       liveContent={dbLiveContent}
       alaCarteData={dbAlaCarte}
+      alaCarteRanksData={dbAlaCarteRanks}
     />
   );
 }
