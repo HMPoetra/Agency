@@ -5,13 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
 import {
-  LayoutDashboard, Users, FileText, Tag, Code2,
+  LayoutDashboard, Users, FileText, Tag, Code2, Home,
   LogOut, Shield, ClipboardList, Menu, X, MessageSquareQuote
 } from "lucide-react";
 import { useState } from "react";
 
 const nav = [
   { href: "/admin",             label: "Dashboard",  icon: LayoutDashboard },
+  { href: "/admin/beranda",     label: "Beranda",    icon: Home },
   { href: "/admin/officers",    label: "Personil",   icon: Users },
   { href: "/admin/divisions",   label: "Divisi",     icon: Shield },
   { href: "/admin/contracts",   label: "Harga & Kontrak", icon: FileText },

@@ -1,17 +1,54 @@
 "use client";
 
-import { useState, Fragment } from "react";
+import { useState } from "react";
 import { updateManualTimeAction } from "@/app/actions/admin";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
-const DAYS = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+const JAKARTA = "Asia/Jakarta";
 
-export default function HoursTableClient({ officers, isAdmin }) {
+function jakartaDateKey(date) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: JAKARTA, year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(new Date(date));
+  const get = (t) => parts.find((p) => p.type === t).value;
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function addDays(key, n) {
+  const d = new Date(`${key}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+function mondayOf(key) {
+  const day = new Date(`${key}T00:00:00Z`).getUTCDay();
+  return addDays(key, day === 0 ? -6 : 1 - day);
+}
+
+function fmtDay(key, withYear = false) {
+  return new Date(`${key}T00:00:00Z`).toLocaleDateString("id-ID", {
+    day: "2-digit", month: "short", timeZone: "UTC", ...(withYear ? { year: "numeric" } : {}),
+  });
+}
+
+export default function HoursTableClient({ officers, attendance = [], isAdmin }) {
   const [editingId, setEditingId] = useState(null);
   const [operation, setOperation] = useState("add"); // "add" or "sub"
   const [inputHours, setInputHours] = useState("");
   const [inputMinutes, setInputMinutes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [weekStart, setWeekStart] = useState(() => mondayOf(jakartaDateKey(new Date())));
+
+  const weekEnd = addDays(weekStart, 6);
+  // ponytail: weeks are limited to the fetched attendance window (limit 1000); add a server-side weekly query if history outgrows it.
+  const weeklyByOfficer = attendance.reduce((acc, r) => {
+    const k = jakartaDateKey(r.checked_in_at);
+    if (k >= weekStart && k <= weekEnd) {
+      acc[r.officer_id] = (acc[r.officer_id] || 0) + Math.round(Number(r.duration_minutes) || 0);
+    }
+    return acc;
+  }, {});
 
   const handleEdit = (officer) => {
     setEditingId(officer.id);
@@ -48,7 +85,24 @@ export default function HoursTableClient({ officers, isAdmin }) {
 
   return (
     <div className="card p-6 border border-line">
-      <h2 className="font-rajdhani text-xl font-bold text-white mb-4">Total Jam Personil</h2>
+      <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="font-rajdhani text-xl font-bold text-white">Total Jam Personil</h2>
+        <div className="flex items-center gap-2 bg-white/[0.02] border border-line rounded-lg p-1">
+          <button onClick={() => setWeekStart((w) => addDays(w, -7))} className="p-1 hover:text-white text-slate-400 transition-colors" title="Minggu sebelumnya">
+            <ChevronLeft className="size-4" />
+          </button>
+          <span className="font-mono text-xs text-slate-300 px-1">
+            {fmtDay(weekStart)} - {fmtDay(weekEnd, true)}
+          </span>
+          <button onClick={() => setWeekStart((w) => addDays(w, 7))} className="p-1 hover:text-white text-slate-400 transition-colors" title="Minggu berikutnya">
+            <ChevronRight className="size-4" />
+          </button>
+          <div className="h-4 w-px bg-line" />
+          <button onClick={() => setWeekStart(mondayOf(jakartaDateKey(new Date())))} className="px-1 text-[10px] font-mono uppercase tracking-wider text-crimson-400 hover:text-crimson-300">
+            Minggu Ini
+          </button>
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead>
@@ -63,9 +117,10 @@ export default function HoursTableClient({ officers, isAdmin }) {
           </thead>
           <tbody>
             {officers.map((o) => {
-              const systemMinutes = parseInt(o.attendance_minutes || 0, 10);
+              const systemMinutes = weeklyByOfficer[o.id] || 0;
+              const totalSystemMinutes = parseInt(o.attendance_minutes || 0, 10);
               const manualMin = parseInt(o.manual_minutes || 0, 10);
-              const totalMins = systemMinutes + manualMin;
+              const totalMins = totalSystemMinutes + manualMin;
               
               const formatMins = (mins, isFull = false) => {
                 const isNeg = mins < 0;
@@ -137,7 +192,7 @@ export default function HoursTableClient({ officers, isAdmin }) {
                             Batal
                           </button>
                           <button
-                            onClick={() => handleSave(o.id, manualMin, systemMinutes)}
+                            onClick={() => handleSave(o.id, manualMin, totalSystemMinutes)}
                             className="btn btn-primary btn-sm"
                             disabled={loading}
                           >

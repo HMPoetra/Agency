@@ -381,10 +381,11 @@ const products = [
    PAGE
    ══════════════════════════════════════════ */
 
-export default function HomeClient({ statsData, pillarsData, divisionsData, officersData, contractsData, pricingData, productsData, reviewsData }) {
+export default function HomeClient({ statsData, pillarsData, divisionsData, officersData, contractsData, pricingData, productsData, reviewsData, content }) {
   return (
     <>
-      <HeroSection stats={statsData} pillars={pillarsData} contracts={contractsData} />
+      <HeroSection stats={statsData} pillars={pillarsData} contracts={contractsData} content={content} />
+      <ProfileSection content={content} />
       <DivisionSection divisions={divisionsData} />
       <RosterSection officers={officersData} divisions={divisionsData} />
       <PricingSection contracts={contractsData} pricing={pricingData} />
@@ -397,8 +398,9 @@ export default function HomeClient({ statsData, pillarsData, divisionsData, offi
 
 /* ─── 01 Hero ─── */
 
-function HeroSection({ stats, pillars, contracts }) {
+function HeroSection({ stats, pillars, contracts, content }) {
   const reduced = useReducedMotion();
+  const c = content || {};
   const statsData = stats ?? [];
   const pillarsData = pillars ?? [];
   const contractsData = contracts ?? [];
@@ -435,14 +437,13 @@ function HeroSection({ stats, pillars, contracts }) {
 
             <TypeTitle
               as="h1"
-              text="Personil *Polisi* Siap Diterjunkan"
+              text={c.hero_title || "Personil *Polisi* Siap Diterjunkan"}
               className="mt-6 font-orbitron text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl"
             />
 
             <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300">
-              Agensi penyedia personil kepolisisan profesional untuk server
-              FiveM. Personil bersertifikat, radio etiquette teruji, dan siap
-              diterjunkan sesuai kebutuhan Server Roleplay Anda.
+              {c.hero_subtitle ||
+                "Agensi penyedia personil kepolisian profesional untuk server FiveM. Personil bersertifikat, radio etiquette teruji, dan siap diterjunkan sesuai kebutuhan Server Roleplay Anda."}
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -575,6 +576,61 @@ function ContractMarquee({ contracts }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ─── 01b Profil ─── */
+
+function ProfileSection({ content }) {
+  const c = content || {};
+  if (!c.profile_title && !c.profile_intro) return null;
+  return (
+    <section
+      id="profil"
+      className="relative overflow-hidden border-t border-line py-20 sm:py-28"
+    >
+      <div className="wrap relative">
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <div>
+            <p className="eyebrow">
+              <span className="font-mono text-slate-600">01</span>
+              <span className="h-px w-6 bg-pine-500/40" />
+              Company Profile
+            </p>
+            <TypeTitle
+              as="h2"
+              text={c.profile_title || "COP-S — COPS ON SUPPLY"}
+              className="mt-4 font-orbitron text-2xl font-bold text-white sm:text-3xl"
+            />
+            {c.profile_intro && (
+              <p className="mt-6 whitespace-pre-line text-base leading-relaxed text-slate-400">
+                {c.profile_intro}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            <div className="card p-6 sm:p-7">
+              <h3 className="font-rajdhani text-xl font-bold text-white">
+                {c.profile_commitment_title || "Komitmen COP-S untuk Klien"}
+              </h3>
+              {c.profile_commitment_body && (
+                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-400">
+                  {c.profile_commitment_body}
+                </p>
+              )}
+            </div>
+            {c.profile_goal && (
+              <div className="rounded-xl border border-crimson-500/20 bg-crimson-500/[0.04] p-6 sm:p-7">
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-200">
+                  {c.profile_goal}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

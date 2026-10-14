@@ -1,12 +1,13 @@
 // app/page.js
 import {
   getStats, getPillars, getDivisions, getOfficersWithHours,
-  getContracts, getPricingTiers, getProducts, getPublishedReviews
+  getContracts, getPricingTiers, getProducts, getPublishedReviews,
+  getSiteContent
 } from "@/lib/queries";
 import HomeClient from "./HomeClient";
 
 export default async function HomePage() {
-  const [dbStats, dbPillars, dbDivisions, dbOfficers, dbContracts, dbPricing, dbProducts, dbReviews] =
+  const [dbStats, dbPillars, dbDivisions, dbOfficers, dbContracts, dbPricing, dbProducts, dbReviews, dbContent] =
     await Promise.all([
       getStats(),
       getPillars(),
@@ -16,6 +17,7 @@ export default async function HomePage() {
       getPricingTiers(),
       getProducts(),
       getPublishedReviews(),
+      getSiteContent(),
     ]);
 
   const activeOfficers = dbOfficers.filter(o => o.status === 'Active').length;
@@ -117,6 +119,7 @@ export default async function HomePage() {
       pricingData={pricingData}
       productsData={productsData}
       reviewsData={reviewsData}
+      content={dbContent}
     />
   );
 }

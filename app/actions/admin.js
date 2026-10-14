@@ -13,7 +13,8 @@ import {
   createRank, deleteRank, createDivision, updateDivision, deleteDivision,
   createPricingTier, updatePricingTier, deletePricingTier,
   createProduct, updateProduct, deleteProduct,
-  updateReview, deleteReview, toggleReviewPublish
+  updateReview, deleteReview, toggleReviewPublish,
+  updateSiteContent, replaceStats, replacePillars
 } from "@/lib/queries";
 import { processImageUrl } from "@/lib/upload";
 
@@ -436,12 +437,21 @@ export async function deleteUserAction(id) {
 /* ═══════════════════════════
    ATTENDANCE
 ═══════════════════════════ */
+const JAKARTA_OFFSET = "+07:00";
+
+// <input type="datetime-local"> sends a naive WIB wall-clock string; anchor it to +07:00.
+function jakartaToIso(value) {
+  if (!value) return null;
+  if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)) return new Date(value).toISOString();
+  return new Date(`${value}${JAKARTA_OFFSET}`).toISOString();
+}
+
 export async function updateAttendanceAction(prevState, formData) {
   await requireAdmin();
   const id = formData.get("id");
   const data = {
-    checked_in_at: formData.get("checked_in_at"),
-    checked_out_at: formData.get("checked_out_at") || null,
+    checked_in_at: jakartaToIso(formData.get("checked_in_at")),
+    checked_out_at: jakartaToIso(formData.get("checked_out_at")),
   };
   try {
     await updateAttendance(id, data);
@@ -457,8 +467,8 @@ export async function createManualAttendanceAction(prevState, formData) {
   await requireAdmin();
   const data = {
     officer_id: formData.get("officer_id"),
-    checked_in_at: formData.get("checked_in_at"),
-    checked_out_at: formData.get("checked_out_at") || null,
+    checked_in_at: jakartaToIso(formData.get("checked_in_at")),
+    checked_out_at: jakartaToIso(formData.get("checked_out_at")),
     note: formData.get("note") || "Manual Entry by Admin",
   };
   try {
@@ -522,4 +532,54 @@ export async function toggleReviewPublishAction(id, is_published) {
   await toggleReviewPublish(id, is_published);
   revalidatePath("/admin/reviews");
   revalidatePath("/");
+}
+
+/* ═══════════════════════════
+   BERANDA (Konten Halaman Utama)
+══════════════════════════ */
+const CONTENT_KEYS = [
+  "hero_title", "hero_subtitle",
+  "profile_title", "profile_intro",
+  "profile_commitment_title", "profile_commitment_body", "profile_goal",
+];
+
+export async function updateSiteContentAction(prevState, formData) {
+  await requireAdmin();
+  try {
+    const entries = Object.fromEntries(
+      CONTENT_KEYS.map((key) => [key, (formData.get(key) || "").toString()])
+    );
+    await updateSiteContent(entries);
+    revalidatePath("/admin/beranda");
+    revalidatePath("/");
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+export async function saveStatsAction(prevState, formData) {
+  await requireAdmin();
+  try {
+    const rows = JSON.parse(formData.get("rows") || "[]");
+    await replaceStats(rows);
+    revalidatePath("/admin/beranda");
+    revalidatePath("/");
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+export async function savePillarsAction(prevState, formData) {
+  await requireAdmin();
+  try {
+    const rows = JSON.parse(formData.get("rows") || "[]");
+    await replacePillars(rows);
+    revalidatePath("/admin/beranda");
+    revalidatePath("/");
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
 }

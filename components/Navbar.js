@@ -17,6 +17,7 @@ const navItems = [
 const sectionIds = [
   "home",
   "about",
+  "profil",
   "divisions",
   "roster",
   "pricing",

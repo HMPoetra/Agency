@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth";
 import { getAttendance, getTodayAttendance, getOfficerById, getOfficersWithHours } from "@/lib/queries";
 import DashboardClient from "./DashboardClient";
 import HoursTableClient from "./HoursTableClient";
+import AttendanceListClient from "./AttendanceListClient";
 import { logoutAction } from "@/app/actions/auth";
 import { LogOut, Shield } from "lucide-react";
 import Link from "next/link";
@@ -13,11 +14,12 @@ export default async function AbsensiPage() {
   const session = await requireAuth();
   const officerId = session.officer_id;
 
-  const [officer, todayRecord, history, allOfficers] = await Promise.all([
+  const [officer, todayRecord, history, allOfficers, allAttendance] = await Promise.all([
     officerId ? getOfficerById(officerId) : null,
     officerId ? getTodayAttendance(officerId) : null,
-    officerId ? getAttendance({ officerId, limit: 100 }) : [],
+    officerId ? getAttendance({ officerId, limit: 1000 }) : [],
     getOfficersWithHours(),
+    getAttendance({ limit: 1000 }),
   ]);
 
   const isAdmin = session.role === "admin";
@@ -57,8 +59,10 @@ export default async function AbsensiPage() {
             todayRecord={todayRecord} 
           />
         )}
-        
-        <HoursTableClient officers={allOfficers} isAdmin={isAdmin} />
+
+        {officer && <AttendanceListClient records={history} />}
+
+        <HoursTableClient officers={allOfficers} attendance={allAttendance} isAdmin={isAdmin} />
         
         {!officer && (
           <div className="card mb-8 flex items-center gap-3 p-6 text-amber-400">

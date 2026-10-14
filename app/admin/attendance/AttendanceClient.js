@@ -5,16 +5,39 @@ import { Edit2, Trash2, X, Plus } from "lucide-react";
 import { createPortal } from "react-dom";
 import { updateAttendanceAction, deleteAttendanceAction, createManualAttendanceAction } from "@/app/actions/admin";
 
+const TZ = "Asia/Jakarta";
+
+function jakartaParts(date) {
+  const d = date instanceof Date ? date : new Date(date);
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: TZ,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(d);
+  const get = (t) => parts.find((p) => p.type === t).value;
+  return { y: get("year"), mo: get("month"), d: get("day"), h: get("hour"), mi: get("minute"), s: get("second") };
+}
+
+function toJakartaInput(date) {
+  if (!date) return "";
+  const p = jakartaParts(date);
+  return `${p.y}-${p.mo}-${p.d}T${p.h}:${p.mi}:${p.s}`;
+}
+
+function toJakartaDateKey(date) {
+  if (!date) return "";
+  const p = jakartaParts(date);
+  return `${p.y}-${p.mo}-${p.d}`;
+}
+
 export default function AttendanceClient({ initialRecords, officers }) {
   const [records, setRecords] = useState(initialRecords);
   const [editingRec, setEditingRec] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   
   // Set default filter date to today (local time)
-  const [filterDate, setFilterDate] = useState(() => {
-    const d = new Date();
-    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-  });
+  const [filterDate, setFilterDate] = useState(() => toJakartaDateKey(new Date()));
 
   // Sync with prop
   useEffect(() => {
@@ -23,11 +46,7 @@ export default function AttendanceClient({ initialRecords, officers }) {
 
   // Filter records based on selected date
   const filteredRecords = filterDate
-    ? records.filter((rec) => {
-        const d = new Date(rec.checked_in_at);
-        const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-        return localDate === filterDate;
-      })
+    ? records.filter((rec) => toJakartaDateKey(rec.checked_in_at) === filterDate)
     : records;
 
   return (
@@ -77,6 +96,7 @@ export default function AttendanceClient({ initialRecords, officers }) {
                 <td className="px-4 py-3 text-slate-400">{rec.division}</td>
                 <td className="px-4 py-3 text-slate-300">
                   {new Date(rec.checked_in_at).toLocaleDateString("id-ID", {
+                    timeZone: "Asia/Jakarta",
                     day: "2-digit",
                     month: "long",
                     year: "numeric"
@@ -151,12 +171,8 @@ function AttendanceModal({ rec, onClose }) {
     }
   }, [state, onClose]);
 
-  // Convert DB timestamp to format for <input type="datetime-local">
-  const formatDatetime = (dateString) => {
-    if (!dateString) return "";
-    const d = new Date(dateString);
-    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
-  };
+  // Convert DB timestamp to WIB wall-clock for <input type="datetime-local">
+  const formatDatetime = (dateString) => toJakartaInput(dateString);
 
   const content = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -223,8 +239,7 @@ function AddAttendanceModal({ officers, onClose }) {
   }, [state, onClose]);
 
   const setTimeToNow = (setter) => {
-    const d = new Date();
-    setter(new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 19));
+    setter(toJakartaInput(new Date()));
   };
 
   const content = (
