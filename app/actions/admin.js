@@ -17,6 +17,7 @@ import {
   updateSiteContent, replaceStats, replacePillars,
   createAlaCarte, updateAlaCarte, setAlaCarteActive, deleteAlaCarte, nextAlaCarteId,
   createAlaCarteRank, updateAlaCarteRank, setAlaCarteRankActive, deleteAlaCarteRank, nextAlaCarteRankId,
+  setAlaCarteOrderStatus, deleteAlaCarteOrder,
 } from "@/lib/queries";
 import { processImageUrl } from "@/lib/upload";
 
@@ -699,4 +700,17 @@ export async function deleteAlaCarteRankAction(id) {
   await deleteAlaCarteRank(id);
   revalidatePath("/admin/ala-carte");
   revalidatePath("/");
+}
+
+/* ── ALA CARTE ORDERS ── */
+export async function setAlaCarteOrderStatusAction(id, status) {
+  await requireAdmin();
+  await setAlaCarteOrderStatus(id, status);
+  revalidatePath("/admin/ala-carte");
+}
+
+export async function deleteAlaCarteOrderAction(id) {
+  await requireAdmin();
+  await deleteAlaCarteOrder(id);
+  revalidatePath("/admin/ala-carte");
 }

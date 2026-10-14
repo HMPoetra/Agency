@@ -5,12 +5,13 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X, Eye, EyeOff, Star } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Eye, EyeOff, Star, Inbox } from "lucide-react";
 import {
   createAlaCarteAction, updateAlaCarteAction,
   setAlaCarteActiveAction, deleteAlaCarteAction,
   createAlaCarteRankAction, updateAlaCarteRankAction,
   setAlaCarteRankActiveAction, deleteAlaCarteRankAction,
+  setAlaCarteOrderStatusAction, deleteAlaCarteOrderAction,
 } from "@/app/actions/admin";
 import { useFormAction } from "@/app/hooks/useFormAction";
 import { useMounted } from "@/app/hooks/useMounted";
@@ -288,7 +289,99 @@ function RankRow({ rank, onRefresh }) {
   );
 }
 
-export default function AlaCarteClient({ items = [], divisions = [], ranks = [] }) {
+/* ── Order Ala Carte dari Beranda ── */
+const ORDER_STATUS = {
+  pending: { label: "Baru", cls: "border-amber-500/25 bg-amber-500/10 text-amber-400" },
+  proses: { label: "Diproses", cls: "border-sky-500/25 bg-sky-500/10 text-sky-400" },
+  selesai: { label: "Selesai", cls: "border-emerald-500/25 bg-emerald-500/10 text-emerald-400" },
+  batal: { label: "Batal", cls: "border-line bg-white/5 text-slate-400" },
+};
+
+function OrderCard({ order, onRefresh }) {
+  const [busy, setBusy] = useState(false);
+  const divisions = Array.isArray(order.divisions) ? order.divisions : [];
+  const ranks = Array.isArray(order.ranks) ? order.ranks : [];
+  const status = ORDER_STATUS[order.status] ?? ORDER_STATUS.pending;
+  const created = order.created_at
+    ? new Date(order.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })
+    : "";
+
+  const change = async (next) => {
+    setBusy(true);
+    const res = await setAlaCarteOrderStatusAction(order.id, next);
+    setBusy(false);
+    if (res?.error) toast.error(res.error);
+    else onRefresh();
+  };
+
+  const remove = async () => {
+    if (!confirm(`Hapus order ${order.id} (${order.server_name})?`)) return;
+    setBusy(true);
+    const res = await deleteAlaCarteOrderAction(order.id);
+    setBusy(false);
+    if (res?.error) toast.error(res.error);
+    else onRefresh();
+  };
+
+  return (
+    <div className="card flex flex-col p-5">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">
+            {order.id} · {created}
+          </span>
+          <h3 className="truncate font-rajdhani text-lg font-bold text-white">
+            {order.server_name}
+          </h3>
+        </div>
+        <span className={`shrink-0 rounded border px-2 py-0.5 font-mono text-[10px] tracking-[0.1em] ${status.cls}`}>
+          {status.label.toUpperCase()}
+        </span>
+      </div>
+
+      <ul className="mt-3 space-y-1.5 text-sm">
+        {divisions.map((d, i) => (
+          <li key={`d${i}`} className="flex items-center justify-between gap-3">
+            <span className="text-slate-400">
+              {d.name} <span className="text-slate-500">× {d.qty} orang</span>
+            </span>
+            <span className="font-mono text-slate-200">{rupiah(d.subtotal)}</span>
+          </li>
+        ))}
+        {ranks.map((r, i) => (
+          <li key={`r${i}`} className="flex items-center justify-between gap-3">
+            <span className="text-slate-400">{r.name}</span>
+            <span className="font-mono text-slate-200">{rupiah(r.price)}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
+        <span className="text-xs uppercase tracking-[0.12em] text-slate-500">Total</span>
+        <span className="font-orbitron font-bold text-white">{rupiah(order.total_idr)}</span>
+      </div>
+
+      <div className="mt-4 flex items-center gap-2">
+        <select
+          value={order.status}
+          onChange={(e) => change(e.target.value)}
+          disabled={busy}
+          aria-label="Status order"
+          className="flex-1 rounded-lg border border-line bg-black/40 px-3 py-2 text-sm text-slate-200"
+        >
+          {Object.entries(ORDER_STATUS).map(([k, v]) => (
+            <option key={k} value={k}>{v.label}</option>
+          ))}
+        </select>
+        <button type="button" onClick={remove} disabled={busy} className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-crimson-500/10 hover:text-crimson-400" aria-label="Hapus order">
+          <Trash2 className="size-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function AlaCarteClient({ items = [], divisions = [], ranks = [], orders = [] }) {
   const router = useRouter();
   const [creatingDivision, setCreatingDivision] = useState(false);
   const [creatingRank, setCreatingRank] = useState(false);
@@ -296,6 +389,28 @@ export default function AlaCarteClient({ items = [], divisions = [], ranks = [] 
 
   return (
     <div className="space-y-10">
+      {/* Pesanan masuk */}
+      <section>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 font-rajdhani text-lg font-bold text-white">
+            <Inbox className="size-4 text-crimson-400" /> Pesanan Masuk
+          </h2>
+          <span className="font-mono text-xs text-slate-500">{orders.length} order</span>
+        </div>
+
+        {orders.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            Belum ada order. Order dari kalkulator Beranda akan muncul di sini.
+          </p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {orders.map((order) => (
+              <OrderCard key={order.id} order={order} onRefresh={refresh} />
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* Harga per divisi */}
       <section>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

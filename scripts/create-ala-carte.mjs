@@ -34,6 +34,20 @@ async function main() {
       updated_at   timestamptz NOT NULL DEFAULT now()
     )`;
 
+  console.log("Creating ala_carte_orders table...");
+  await sql`
+    CREATE TABLE IF NOT EXISTS ala_carte_orders (
+      id           text PRIMARY KEY,
+      server_name  text NOT NULL DEFAULT '',
+      divisions    jsonb NOT NULL DEFAULT '[]'::jsonb,
+      ranks        jsonb NOT NULL DEFAULT '[]'::jsonb,
+      subtotal     bigint NOT NULL DEFAULT 0,
+      total_idr    bigint NOT NULL DEFAULT 0,
+      status       text NOT NULL DEFAULT 'pending',
+      created_at   timestamptz NOT NULL DEFAULT now(),
+      updated_at   timestamptz NOT NULL DEFAULT now()
+    )`;
+
   const rows = await sql`SELECT COUNT(*)::int AS n FROM ala_carte`;
   console.log("ala_carte table ready. rows:", rows[0].n);
 }

@@ -1,15 +1,16 @@
 // app/admin/ala-carte/page.js
-import { getAlaCarte, getDivisions, getAlaCarteRanks } from "@/lib/queries";
+import { getAlaCarte, getDivisions, getAlaCarteRanks, getAlaCarteOrders } from "@/lib/queries";
 import AlaCarteClient from "./AlaCarteClient";
 import { ShoppingBag } from "lucide-react";
 
 export const metadata = { title: "Ala Carte — Admin COP-S" };
 
 export default async function AlaCartePage() {
-  const [items, divisions, ranks] = await Promise.all([
+  const [items, divisions, ranks, orders] = await Promise.all([
     getAlaCarte(),
     getDivisions(),
     getAlaCarteRanks(),
+    getAlaCarteOrders(),
   ]);
 
   return (
@@ -29,7 +30,7 @@ export default async function AlaCartePage() {
         </p>
       </div>
 
-      <AlaCarteClient items={items} divisions={divisions} ranks={ranks} />
+      <AlaCarteClient items={items} divisions={divisions} ranks={ranks} orders={orders} />
     </div>
   );
 }

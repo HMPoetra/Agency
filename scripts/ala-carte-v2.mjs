@@ -21,11 +21,26 @@ async function main() {
       updated_at   timestamptz NOT NULL DEFAULT now()
     )`;
 
-  const [ac, rk] = await Promise.all([
+  console.log("Creating ala_carte_orders table…");
+  await sql`
+    CREATE TABLE IF NOT EXISTS ala_carte_orders (
+      id           text PRIMARY KEY,
+      server_name  text NOT NULL DEFAULT '',
+      divisions    jsonb NOT NULL DEFAULT '[]'::jsonb,
+      ranks        jsonb NOT NULL DEFAULT '[]'::jsonb,
+      subtotal     bigint NOT NULL DEFAULT 0,
+      total_idr    bigint NOT NULL DEFAULT 0,
+      status       text NOT NULL DEFAULT 'pending',
+      created_at   timestamptz NOT NULL DEFAULT now(),
+      updated_at   timestamptz NOT NULL DEFAULT now()
+    )`;
+
+  const [ac, rk, or_] = await Promise.all([
     sql`SELECT COUNT(*)::int AS n FROM ala_carte`,
     sql`SELECT COUNT(*)::int AS n FROM ala_carte_ranks`,
+    sql`SELECT COUNT(*)::int AS n FROM ala_carte_orders`,
   ]);
-  console.log("done. ala_carte:", ac[0].n, "ranks:", rk[0].n);
+  console.log("done. ala_carte:", ac[0].n, "ranks:", rk[0].n, "orders:", or_[0].n);
 }
 
 main().catch((e) => {
