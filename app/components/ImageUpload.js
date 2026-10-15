@@ -46,6 +46,11 @@ export default function ImageUpload({ name = "photo_url", defaultValue = "", lab
       alert("Hanya file gambar yang diperbolehkan");
       return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Ukuran gambar maksimal 5MB");
+      return;
+    }
     
     // Set preview
     const reader = new FileReader();
