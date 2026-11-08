@@ -3,7 +3,7 @@ import { getDashboardSummary, getOfficers, getAttendance, getDivisions } from "@
 import { getSession } from "@/lib/auth";
 import {
   Users, FileText, Clock, TrendingUp,
-  CheckCircle, AlertCircle, Shield,
+  CheckCircle, AlertCircle, Shield, Server,
 } from "lucide-react";
 
 export default async function AdminDashboard() {
@@ -112,7 +112,7 @@ export default async function AdminDashboard() {
             <table className="w-full text-sm whitespace-nowrap">
               <thead>
                 <tr className="border-b border-line">
-                  {["Personil", "Callsign", "Divisi", "Check-In", "Check-Out", "Status"].map((h) => (
+                  {["Personil", "Callsign", "Divisi", "Lokasi Server", "Check-In", "Check-Out", "Status"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">
                       {h}
                     </th>
@@ -120,32 +120,45 @@ export default async function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {recentAttendance.map((rec) => (
-                  <tr key={rec.id} className="border-b border-line/50 last:border-0 hover:bg-white/[0.015] transition-colors">
-                    <td className="px-4 py-3 text-slate-200">{rec.full_name}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-400">{rec.callsign}</td>
-                    <td className="px-4 py-3 text-slate-400">{divisionLabel(rec.division)}</td>
-                    <td className="px-4 py-3 font-mono text-crimson-400 whitespace-nowrap">
-                      {new Date(rec.checked_in_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} {new Date(rec.checked_in_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false })} WIB
-                    </td>
-                    <td className="px-4 py-3 font-mono text-slate-400 whitespace-nowrap">
-                      {rec.checked_out_at
-                        ? `${new Date(rec.checked_out_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} ${new Date(rec.checked_out_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false })} WIB`
-                        : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      {rec.checked_out_at ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
-                          <CheckCircle className="size-3" /> Selesai
+                {recentAttendance.map((rec) => {
+                  const serverMatch = rec.note?.match(/\[(.*?)\]/);
+                  const serverName = serverMatch
+                    ? serverMatch[1]
+                    : (rec.note?.toLowerCase().includes("7glory") ? "7GloryRP" : "MoxieRP");
+
+                  return (
+                    <tr key={rec.id} className="border-b border-line/50 last:border-0 hover:bg-white/[0.015] transition-colors">
+                      <td className="px-4 py-3 text-slate-200">{rec.full_name}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-slate-400">{rec.callsign}</td>
+                      <td className="px-4 py-3 text-slate-400">{divisionLabel(rec.division)}</td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1.5 font-mono text-xs px-2.5 py-1 rounded-md bg-white/5 border border-line text-slate-300">
+                          <Server className="size-3 text-crimson-400" />
+                          {serverName}
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs text-amber-400">
-                          <AlertCircle className="size-3" /> Aktif
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-crimson-400 whitespace-nowrap">
+                        {new Date(rec.checked_in_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} {new Date(rec.checked_in_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false })} WIB
+                      </td>
+                      <td className="px-4 py-3 font-mono text-slate-400 whitespace-nowrap">
+                        {rec.checked_out_at
+                          ? `${new Date(rec.checked_out_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} ${new Date(rec.checked_out_at).toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false })} WIB`
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {rec.checked_out_at ? (
+                          <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
+                            <CheckCircle className="size-3" /> Selesai
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs text-amber-400">
+                            <AlertCircle className="size-3" /> Aktif
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             </div>

@@ -70,44 +70,62 @@ export default function AttendanceListClient({ records = [] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line">
-              {["Tanggal", "Check-In", "Check-Out", "Durasi", "Status"].map((h) => (
+              {["Tanggal", "Server", "Check-In", "Check-Out", "Durasi", "Status"].map((h) => (
                 <th key={h} className="whitespace-nowrap px-4 py-3 text-left font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {filtered.map((rec) => (
-              <tr key={rec.id} className="border-b border-line/50 last:border-0 hover:bg-white/[0.015] transition-colors">
-                <td className="px-4 py-3 text-slate-300">
-                  {new Date(rec.checked_in_at).toLocaleDateString("id-ID", {
-                    timeZone: TZ, day: "2-digit", month: "long", year: "numeric",
-                  })}
-                </td>
-                <td className="px-4 py-3 font-mono text-emerald-400">
-                  {new Date(rec.checked_in_at).toLocaleTimeString("id-ID", { timeZone: TZ, hour12: false })} WIB
-                </td>
-                <td className="px-4 py-3 font-mono text-crimson-400">
-                  {rec.checked_out_at ? new Date(rec.checked_out_at).toLocaleTimeString("id-ID", { timeZone: TZ, hour12: false }) + " WIB" : "-"}
-                </td>
-                <td className="px-4 py-3 font-mono text-slate-300">
-                  {rec.duration_minutes ? `${Math.floor(rec.duration_minutes / 60)}j ${Math.floor(rec.duration_minutes % 60)}m` : "-"}
-                </td>
-                <td className="px-4 py-3">
-                  {rec.checked_out_at ? (
-                    <span className="inline-flex items-center gap-1 rounded bg-slate-500/10 px-2 py-1 text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-                      Selesai
+            {filtered.map((rec) => {
+              const serverMatch = rec.note?.match(/^\[(.*?)\]/);
+              const recServer = serverMatch ? serverMatch[1] : "MoxieRP";
+              const userNote = rec.note ? rec.note.replace(/^\[.*?\]\s*/, "") : "";
+
+              return (
+                <tr key={rec.id} className="border-b border-line/50 last:border-0 hover:bg-white/[0.015] transition-colors">
+                  <td className="px-4 py-3 text-slate-300">
+                    <div>
+                      {new Date(rec.checked_in_at).toLocaleDateString("id-ID", {
+                        timeZone: TZ, day: "2-digit", month: "long", year: "numeric",
+                      })}
+                      {userNote && (
+                        <p className="text-[11px] text-slate-500 mt-0.5 truncate max-w-[180px]">
+                          {userNote}
+                        </p>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="inline-flex items-center font-mono text-xs px-2 py-0.5 rounded bg-white/5 border border-line text-slate-300">
+                      {recServer}
                     </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-1 text-[10px] font-medium text-emerald-400 uppercase tracking-wider">
-                      Aktif
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-emerald-400">
+                    {new Date(rec.checked_in_at).toLocaleTimeString("id-ID", { timeZone: TZ, hour12: false })} WIB
+                  </td>
+                  <td className="px-4 py-3 font-mono text-crimson-400">
+                    {rec.checked_out_at ? new Date(rec.checked_out_at).toLocaleTimeString("id-ID", { timeZone: TZ, hour12: false }) + " WIB" : "-"}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-slate-300">
+                    {rec.duration_minutes ? `${Math.floor(rec.duration_minutes / 60)}j ${Math.floor(rec.duration_minutes % 60)}m` : "-"}
+                  </td>
+                  <td className="px-4 py-3">
+                    {rec.checked_out_at ? (
+                      <span className="inline-flex items-center gap-1 rounded bg-slate-500/10 px-2 py-1 text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+                        Selesai
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-1 text-[10px] font-medium text-emerald-400 uppercase tracking-wider">
+                        Aktif
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
                   Belum ada data absensi untuk periode ini.
                 </td>
               </tr>

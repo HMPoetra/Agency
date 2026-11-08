@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useActionState } from "react";
 import { checkInAction, checkOutAction } from "@/app/actions/attendance";
-import { LogIn, LogOut, Clock, CalendarClock, Activity } from "lucide-react";
+import { LogIn, LogOut, Clock, CalendarClock, Activity, Server } from "lucide-react";
 
 const TZ = "Asia/Jakarta";
 
@@ -30,7 +30,7 @@ function fmtDuration(totalMinutes) {
   return `${Math.floor(mins / 60)}j ${mins % 60}m`;
 }
 
-export default function DashboardClient({ officer, history = [], todayRecord }) {
+export default function DashboardClient({ officer, history = [], todayRecord, servers = [] }) {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -47,23 +47,43 @@ export default function DashboardClient({ officer, history = [], todayRecord }) 
   });
   const timeString = now.toLocaleTimeString("id-ID", { timeZone: TZ, hour12: false }) + " WIB";
 
-  // Jam minggu ini (Senin–Minggu, WIB)
-  const weekStart = mondayOf(jakartaKey(now));
-  const weekKeys = new Set(Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)));
-  const weekMinutes = history.reduce(
-    (acc, rec) => (weekKeys.has(jakartaKey(rec.checked_in_at)) ? acc + (Number(rec.duration_minutes) || 0) : acc),
-    0
-  );
-
-  // Total akumulasi (sistem + manual)
-  const totalMinutes =
-    history.reduce((acc, rec) => acc + (Number(rec.duration_minutes) || 0), 0) +
-    (parseInt(officer?.manual_minutes, 10) || 0);
-
   const isCheckedIn = todayRecord && !todayRecord.checked_out_at;
   const checkInTime = todayRecord
     ? new Date(todayRecord.checked_in_at).toLocaleTimeString("id-ID", { timeZone: TZ, hour12: false }) + " WIB"
     : null;
+
+  const serverMatch = todayRecord?.note?.match(/^\[(.*?)\]/);
+  const checkedInServer = serverMatch ? serverMatch[1] : null;
+  const cleanNote = todayRecord?.note ? todayRecord.note.replace(/^\[.*?\]\s*/, "") : "";
+
+  // Jam minggu ini (Senin–Minggu, WIB)
+  const weekStart = mondayOf(jakartaKey(now));
+  const weekKeys = new Set(Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)));
+
+  const activeElapsed = isCheckedIn && todayRecord.checked_in_at
+    ? Math.max(1, Math.round((now.getTime() - new Date(todayRecord.checked_in_at).getTime()) / 60000))
+    : 0;
+
+  const weekMinutes = history.reduce(
+    (acc, rec) => (weekKeys.has(jakartaKey(rec.checked_in_at)) ? acc + (Number(rec.duration_minutes) || 0) : acc),
+    0
+  ) + activeElapsed;
+
+  // Total akumulasi (sistem + manual)
+  const totalMinutes =
+    history.reduce((acc, rec) => acc + (Number(rec.duration_minutes) || 0), 0) +
+    (parseInt(officer?.manual_minutes, 10) || 0) + activeElapsed;
+
+  const availableServers = servers && servers.length > 0
+    ? servers
+    : [
+        { id: "7glory", name: "7GloryRP" },
+        { id: "moxie", name: "MoxieRP" },
+      ];
+
+  const [selectedServer, setSelectedServer] = useState(
+    () => availableServers[0]?.name || "7GloryRP"
+  );
 
   const [checkInState, checkInDispatch, checkInPending] = useActionState(checkInAction, null);
   const [note, setNote] = useState("");
@@ -121,7 +141,11 @@ export default function DashboardClient({ officer, history = [], todayRecord }) 
         <StatCard
           label="Status Shift"
           value={isCheckedIn ? "Aktif" : "Off Duty"}
-          sub={isCheckedIn ? `Mulai ${checkInTime}` : "Belum check-in hari ini"}
+          sub={
+            isCheckedIn
+              ? `${checkedInServer ? `${checkedInServer} • ` : ""}Mulai ${checkInTime}`
+              : "Belum check-in hari ini"
+          }
           icon={Activity}
           tone={isCheckedIn ? "emerald" : "slate"}
         />
@@ -137,9 +161,24 @@ export default function DashboardClient({ officer, history = [], todayRecord }) 
             </span>
             <div>
               <h2 className="font-rajdhani text-2xl font-bold text-white">Sedang Bertugas</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                Check-in: <span className="font-mono text-emerald-400">{checkInTime}</span>
-              </p>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2 text-sm text-slate-400">
+                {checkedInServer && (
+                  <>
+                    <span className="inline-flex items-center gap-1 font-mono text-xs px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-semibold">
+                      <Server className="size-3.5" /> {checkedInServer}
+                    </span>
+                    <span className="text-slate-600">•</span>
+                  </>
+                )}
+                <p>
+                  Check-in: <span className="font-mono text-emerald-400">{checkInTime}</span>
+                </p>
+              </div>
+              {cleanNote && (
+                <p className="mt-1 text-xs text-slate-500 italic">
+                  Catatan: &ldquo;{cleanNote}&rdquo;
+                </p>
+              )}
             </div>
             <form action={() => checkOutAction(todayRecord.id)} className="w-full max-w-sm">
               <button type="submit" className="btn btn-danger w-full">
@@ -158,11 +197,37 @@ export default function DashboardClient({ officer, history = [], todayRecord }) 
                 <p className="mt-1 text-sm text-slate-400">
                   {todayRecord
                     ? "Kamu sudah menyelesaikan shift sebelumnya hari ini. Mulai shift baru?"
-                    : "Rekam kehadiran kamu untuk hari ini."}
+                    : "Pilih server tujuan dan rekam kehadiran kamu."}
                 </p>
               </div>
             </div>
             <form action={checkInDispatch} className="mt-5 space-y-4">
+              {/* Pilihan Server */}
+              <div>
+                <label className="label">Pilih Server Roleplay</label>
+                <div className="flex flex-wrap gap-2">
+                  {availableServers.map((s) => {
+                    const isSelected = selectedServer === s.name;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setSelectedServer(s.name)}
+                        className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-mono transition-all ${
+                          isSelected
+                            ? "bg-crimson-600 border border-crimson-500 text-white font-bold shadow-md shadow-crimson-900/30"
+                            : "bg-white/[0.03] border border-line text-slate-400 hover:text-white hover:bg-white/[0.06]"
+                        }`}
+                      >
+                        <Server className="size-3.5" />
+                        <span>{s.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <input type="hidden" name="server" value={selectedServer} />
+              </div>
+
               <div>
                 <label htmlFor="shift-note" className="label">Catatan (opsional)</label>
                 <input
@@ -171,20 +236,22 @@ export default function DashboardClient({ officer, history = [], todayRecord }) 
                   name="note"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Mis. Duty harian"
+                  placeholder="Mis. Duty harian / patroli"
                   className="field"
                 />
               </div>
+
               {checkInState?.error && (
                 <p className="text-sm text-crimson-400">{checkInState.error}</p>
               )}
+
               <button type="submit" disabled={checkInPending} className="btn btn-primary w-full">
                 {checkInPending ? (
                   <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                 ) : (
                   <LogIn className="size-4" />
                 )}
-                Check-In Sekarang
+                Check-In ke {selectedServer}
               </button>
             </form>
           </div>

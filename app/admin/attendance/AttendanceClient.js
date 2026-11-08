@@ -81,18 +81,26 @@ export default function AttendanceClient({ initialRecords, officers, divisions =
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line">
-              {["Personil", "Callsign", "Divisi", "Tanggal", "Check-In", "Check-Out", "Durasi", "Status", "Aksi"].map((h) => (
+              {["Personil", "Callsign", "Divisi", "Server", "Tanggal", "Check-In", "Check-Out", "Durasi", "Status", "Aksi"].map((h) => (
                 <th key={h} className="whitespace-nowrap px-4 py-3 text-left font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {filteredRecords.map((rec) => (
-              <tr key={rec.id} className="border-b border-line/50 last:border-0 hover:bg-white/[0.015] transition-colors">
-                <td className="px-4 py-3 text-slate-200 font-medium">{rec.full_name}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-400">{rec.callsign}</td>
-                <td className="px-4 py-3 text-slate-400">{divisionLabel(rec.division)}</td>
-                <td className="px-4 py-3 text-slate-300">
+            {filteredRecords.map((rec) => {
+              const recServer = rec.note?.match(/^\[(.*?)\]/)?.[1] || "MoxieRP";
+
+              return (
+                <tr key={rec.id} className="border-b border-line/50 last:border-0 hover:bg-white/[0.015] transition-colors">
+                  <td className="px-4 py-3 text-slate-200 font-medium">{rec.full_name}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-slate-400">{rec.callsign}</td>
+                  <td className="px-4 py-3 text-slate-400">{divisionLabel(rec.division)}</td>
+                  <td className="px-4 py-3">
+                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-white/5 border border-line text-slate-300">
+                      {recServer}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-slate-300">
                   {new Date(rec.checked_in_at).toLocaleDateString("id-ID", {
                     timeZone: "Asia/Jakarta",
                     day: "2-digit",
@@ -137,10 +145,11 @@ export default function AttendanceClient({ initialRecords, officers, divisions =
                   </div>
                 </td>
               </tr>
-            ))}
+            );
+          })}
             {filteredRecords.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={10} className="px-4 py-8 text-center text-slate-500">
                   Belum ada data absensi untuk periode ini.
                 </td>
               </tr>

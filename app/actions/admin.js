@@ -564,6 +564,18 @@ export async function updateSiteContentAction(prevState, formData) {
   }
 }
 
+export async function saveVisualServersAction(serversJson) {
+  await requireAdmin();
+  try {
+    await updateSiteContent({ attendance_visual_servers: serversJson });
+    revalidatePath("/absensi");
+    revalidatePath("/admin/attendance");
+    return { success: true };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
 export async function saveStatsAction(prevState, formData) {
   await requireAdmin();
   try {

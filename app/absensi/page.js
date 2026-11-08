@@ -1,6 +1,6 @@
 // app/absensi/page.js
 import { requireAuth } from "@/lib/auth";
-import { getAttendance, getTodayAttendance, getOfficerById, getOfficersWithHours } from "@/lib/queries";
+import { getAttendance, getTodayAttendance, getOfficerById, getOfficersWithHours, getSiteContent } from "@/lib/queries";
 import DashboardClient from "./DashboardClient";
 import HoursTableClient from "./HoursTableClient";
 import AttendanceListClient from "./AttendanceListClient";
@@ -14,15 +14,36 @@ export default async function AbsensiPage() {
   const session = await requireAuth();
   const officerId = session.officer_id;
 
-  const [officer, todayRecord, history, allOfficers, allAttendance] = await Promise.all([
+  const [officer, todayRecord, history, allOfficers, allAttendance, siteContent] = await Promise.all([
     officerId ? getOfficerById(officerId) : null,
     officerId ? getTodayAttendance(officerId) : null,
     officerId ? getAttendance({ officerId, limit: 1000 }) : [],
     getOfficersWithHours(),
     getAttendance({ limit: 1000 }),
+    getSiteContent().catch(() => ({})),
   ]);
 
   const isAdmin = session.role === "admin";
+
+  let visualServers = [
+    { id: "7glory", name: "7GloryRP", subtitle: "Mulai dari 0 jam (Visual)", createdAt: 1000 },
+  ];
+  if (siteContent?.attendance_visual_servers) {
+    try {
+      const parsed = JSON.parse(siteContent.attendance_visual_servers);
+      if (Array.isArray(parsed) && parsed.length > 0) visualServers = parsed;
+    } catch (_) {}
+  }
+
+  const MOXIE_SERVER = {
+    id: "moxie",
+    name: "MoxieRP",
+    subtitle: "Data akumulasi jam absensi dari database",
+    isDb: true,
+    createdAt: 0,
+  };
+
+  const servers = [...visualServers, MOXIE_SERVER].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
   return (
     <div className="min-h-screen bg-night lg:flex">
@@ -40,7 +61,12 @@ export default async function AbsensiPage() {
           {officer && (
             <>
               <section id="dashboard" className="scroll-mt-24">
-                <DashboardClient officer={officer} history={history} todayRecord={todayRecord} />
+                <DashboardClient
+                  officer={officer}
+                  history={history}
+                  todayRecord={todayRecord}
+                  servers={servers}
+                />
               </section>
 
               <section id="live" className="scroll-mt-24">
@@ -54,7 +80,12 @@ export default async function AbsensiPage() {
           )}
 
           <section id="total" className="scroll-mt-24">
-            <HoursTableClient officers={allOfficers} attendance={allAttendance} isAdmin={isAdmin} />
+            <HoursTableClient
+              officers={allOfficers}
+              attendance={allAttendance}
+              isAdmin={isAdmin}
+              initialVisualServers={siteContent?.attendance_visual_servers}
+            />
           </section>
         </div>
       </main>

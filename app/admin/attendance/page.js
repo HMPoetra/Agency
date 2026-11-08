@@ -1,5 +1,5 @@
 // app/admin/attendance/page.js
-import { getAttendance, getOfficersWithHours, getDivisions } from "@/lib/queries";
+import { getAttendance, getOfficersWithHours, getDivisions, getSiteContent } from "@/lib/queries";
 import { ClipboardList, CheckCircle, AlertCircle } from "lucide-react";
 import AttendanceClient from "./AttendanceClient";
 import HoursTableClient from "@/app/absensi/HoursTableClient";
@@ -7,10 +7,11 @@ import HoursTableClient from "@/app/absensi/HoursTableClient";
 export const metadata = { title: "Data Absensi — Admin COP-S" };
 
 export default async function AttendancePage() {
-  const [records, allOfficers, divisions] = await Promise.all([
+  const [records, allOfficers, divisions, siteContent] = await Promise.all([
     getAttendance({ limit: 1000 }),
     getOfficersWithHours(),
     getDivisions(),
+    getSiteContent().catch(() => ({})),
   ]);
 
   const totalToday = records.filter(
@@ -51,7 +52,12 @@ export default async function AttendancePage() {
         <AttendanceClient initialRecords={records} officers={allOfficers} divisions={divisions} />
       </div>
 
-      <HoursTableClient officers={allOfficers} attendance={records} isAdmin={true} />
+      <HoursTableClient
+        officers={allOfficers}
+        attendance={records}
+        isAdmin={true}
+        initialVisualServers={siteContent?.attendance_visual_servers}
+      />
     </div>
   );
 }
