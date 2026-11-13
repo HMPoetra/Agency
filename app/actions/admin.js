@@ -455,10 +455,21 @@ function jakartaToIso(value) {
 export async function updateAttendanceAction(prevState, formData) {
   await requireAdmin();
   const id = formData.get("id");
+  const server = formData.get("server");
+  const rawNote = formData.get("note");
+
   const data = {
     checked_in_at: jakartaToIso(formData.get("checked_in_at")),
     checked_out_at: jakartaToIso(formData.get("checked_out_at")),
   };
+
+  if (server !== null && server !== undefined) {
+    const cleanNote = (rawNote || "").replace(/^\[.*?\]\s*/, "").trim();
+    data.note = server ? `[${server}] ${cleanNote}`.trim() : cleanNote;
+  } else if (rawNote !== null && rawNote !== undefined) {
+    data.note = rawNote;
+  }
+
   try {
     await updateAttendance(id, data);
     revalidatePath("/admin/attendance");
@@ -471,11 +482,18 @@ export async function updateAttendanceAction(prevState, formData) {
 
 export async function createManualAttendanceAction(prevState, formData) {
   await requireAdmin();
+  const server = formData.get("server") || "7GloryRP";
+  const rawNote = (formData.get("note") || "").trim();
+  const cleanNote = rawNote.replace(/^\[.*?\]\s*/, "").trim();
+  const finalNote = server
+    ? (cleanNote ? `[${server}] ${cleanNote}` : `[${server}] Manual Entry by Admin`)
+    : (cleanNote || "Manual Entry by Admin");
+
   const data = {
     officer_id: formData.get("officer_id"),
     checked_in_at: jakartaToIso(formData.get("checked_in_at")),
     checked_out_at: jakartaToIso(formData.get("checked_out_at")),
-    note: formData.get("note") || "Manual Entry by Admin",
+    note: finalNote,
   };
   try {
     await createManualAttendance(data);

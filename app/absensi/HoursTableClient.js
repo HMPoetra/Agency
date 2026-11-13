@@ -144,7 +144,14 @@ export default function HoursTableClient({
   // Hitung akumulasi total jam sistem per personil per server
   const getTotalSystemForServer = (server, officerId, dbTotalMinutes) => {
     if (server.isDb) {
-      return dbTotalMinutes;
+      // Kurangi jam dari server visual (seperti 7GloryRP) agar tidak tercampur ke MoxieRP
+      const nonDbMinutes = attendance.reduce((acc, r) => {
+        if (String(r.officer_id) === String(officerId) && !isRecordForServer(r, server)) {
+          acc += getRecordMinutes(r);
+        }
+        return acc;
+      }, 0);
+      return Math.max(0, (dbTotalMinutes || 0) - nonDbMinutes);
     }
     return attendance.reduce((acc, r) => {
       if (String(r.officer_id) === String(officerId) && isRecordForServer(r, server)) {
@@ -541,7 +548,7 @@ export default function HoursTableClient({
                                 ) : (
                                   <div className="flex justify-end gap-3 items-center">
                                     <Link
-                                      href={`/admin/attendance/${o.id}`}
+                                      href={`/admin/attendance/${o.id}?server=${encodeURIComponent(server.name)}`}
                                       className="text-xs text-emerald-400 hover:text-emerald-300 underline"
                                     >
                                       Detail Absensi
@@ -716,6 +723,12 @@ export default function HoursTableClient({
                                 </div>
                               ) : (
                                 <div className="flex justify-end gap-3 items-center">
+                                  <Link
+                                    href={`/admin/attendance/${o.id}?server=${encodeURIComponent(server.name)}`}
+                                    className="text-xs text-emerald-400 hover:text-emerald-300 underline"
+                                  >
+                                    Detail Absensi
+                                  </Link>
                                   <button
                                     type="button"
                                     onClick={() => {

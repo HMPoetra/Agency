@@ -26,9 +26,15 @@ function mondayOf(key) {
 export default function AttendanceListClient({ records = [] }) {
   const [start, setStart] = useState(() => mondayOf(jakartaKey(new Date())));
   const [end, setEnd] = useState(() => addDays(mondayOf(jakartaKey(new Date())), 6));
+  const [serverFilter, setServerFilter] = useState("all");
 
   const filtered = records
     .filter((r) => {
+      if (serverFilter !== "all") {
+        const sMatch = r.note?.match(/^\[(.*?)\]/);
+        const s = sMatch ? sMatch[1] : (r.note?.toLowerCase().includes("7glory") ? "7GloryRP" : "MoxieRP");
+        if (s.toLowerCase() !== serverFilter.toLowerCase()) return false;
+      }
       const k = jakartaKey(r.checked_in_at);
       if (start && k < start) return false;
       if (end && k > end) return false;
@@ -53,16 +59,35 @@ export default function AttendanceListClient({ records = [] }) {
             </p>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="text-xs text-slate-400 uppercase tracking-widest">Rentang:</label>
-          <input type="date" value={start} onChange={(e) => setStart(e.target.value)} className="field w-auto text-sm h-9" />
-          <span className="text-slate-500 text-xs">-</span>
-          <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="field w-auto text-sm h-9" />
-          {(start || end) && (
-            <button onClick={() => { setStart(""); setEnd(""); }} className="py-2 text-xs text-crimson-400 hover:text-crimson-300">
-              Semua
-            </button>
-          )}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex rounded-lg bg-black/40 p-0.5 border border-line gap-1">
+            {["all", "7GloryRP", "MoxieRP"].map((srv) => (
+              <button
+                key={srv}
+                type="button"
+                onClick={() => setServerFilter(srv)}
+                className={`px-2.5 py-1 text-xs font-mono uppercase tracking-wider rounded transition-colors ${
+                  serverFilter === srv
+                    ? "bg-crimson-600 text-white font-bold"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                {srv === "all" ? "Semua Server" : srv}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-slate-400 uppercase tracking-widest">Rentang:</label>
+            <input type="date" value={start} onChange={(e) => setStart(e.target.value)} className="field w-auto text-sm h-9" />
+            <span className="text-slate-500 text-xs">-</span>
+            <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="field w-auto text-sm h-9" />
+            {(start || end) && (
+              <button onClick={() => { setStart(""); setEnd(""); }} className="py-2 text-xs text-crimson-400 hover:text-crimson-300">
+                Semua
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

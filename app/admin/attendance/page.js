@@ -18,6 +18,23 @@ export default async function AttendancePage() {
     (r) => new Date(r.checked_in_at).toDateString() === new Date().toDateString()
   ).length;
 
+  let visualServers = [
+    { id: "7glory", name: "7GloryRP", createdAt: 1000 },
+  ];
+  if (siteContent?.attendance_visual_servers) {
+    try {
+      const parsed = JSON.parse(siteContent.attendance_visual_servers);
+      if (Array.isArray(parsed) && parsed.length > 0) visualServers = parsed;
+    } catch (_) {}
+  }
+  const MOXIE_SERVER = {
+    id: "moxie",
+    name: "MoxieRP",
+    isDb: true,
+    createdAt: 0,
+  };
+  const servers = [...visualServers, MOXIE_SERVER].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
   return (
     <div className="space-y-8">
       <div>
@@ -49,7 +66,7 @@ export default async function AttendancePage() {
           </div>
         </div>
 
-        <AttendanceClient initialRecords={records} officers={allOfficers} divisions={divisions} />
+        <AttendanceClient initialRecords={records} officers={allOfficers} divisions={divisions} servers={servers} />
       </div>
 
       <HoursTableClient

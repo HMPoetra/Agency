@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/auth";
-import { getOfficerById, getAttendance } from "@/lib/queries";
+import { getOfficerById, getAttendance, getSiteContent } from "@/lib/queries";
 import { notFound } from "next/navigation";
 import OfficerAttendanceClient from "./OfficerAttendanceClient";
 import Link from "next/link";
@@ -7,14 +7,38 @@ import { ArrowLeft } from "lucide-react";
 
 export const metadata = { title: "Detail Absensi Personil — Admin COP-S" };
 
-export default async function OfficerAttendancePage({ params }) {
+export default async function OfficerAttendancePage({ params, searchParams }) {
   await requireAdmin();
   const { id } = await params;
-  
-  const officer = await getOfficerById(id);
+  const sp = searchParams ? await searchParams : {};
+  const initialServer = sp?.server || null;
+
+  const [officer, records, siteContent] = await Promise.all([
+    getOfficerById(id),
+    getAttendance({ officerId: id, limit: 1000 }),
+    getSiteContent().catch(() => ({})),
+  ]);
+
   if (!officer) notFound();
 
-  const records = await getAttendance({ officerId: id, limit: 1000 });
+  let visualServers = [
+    { id: "7glory", name: "7GloryRP", createdAt: 1000 },
+  ];
+  if (siteContent?.attendance_visual_servers) {
+    try {
+      const parsed = JSON.parse(siteContent.attendance_visual_servers);
+      if (Array.isArray(parsed) && parsed.length > 0) visualServers = parsed;
+    } catch (_) {}
+  }
+
+  const MOXIE_SERVER = {
+    id: "moxie",
+    name: "MoxieRP",
+    isDb: true,
+    createdAt: 0,
+  };
+
+  const servers = [...visualServers, MOXIE_SERVER].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
   return (
     <div className="space-y-8">
@@ -37,8 +61,13 @@ export default async function OfficerAttendancePage({ params }) {
             Kembali
           </Link>
         </div>
-        
-        <OfficerAttendanceClient officer={officer} initialRecords={records} />
+
+        <OfficerAttendanceClient
+          officer={officer}
+          initialRecords={records}
+          servers={servers}
+          initialServer={initialServer}
+        />
       </div>
     </div>
   );

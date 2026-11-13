@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useActionState, useEffect } from "react";
-import { Edit2, Trash2, X, Plus } from "lucide-react";
+import { Edit2, Trash2, X, Plus, Server } from "lucide-react";
 import { createPortal } from "react-dom";
 import { updateAttendanceAction, deleteAttendanceAction, createManualAttendanceAction } from "@/app/actions/admin";
 
@@ -31,7 +31,7 @@ function toJakartaDateKey(date) {
   return `${p.y}-${p.mo}-${p.d}`;
 }
 
-export default function AttendanceClient({ initialRecords, officers, divisions = [] }) {
+export default function AttendanceClient({ initialRecords, officers, divisions = [], servers = [] }) {
   const divName = Object.fromEntries(divisions.map((d) => [d.id, d.name]));
   const divisionLabel = (csv) =>
     (csv ? csv.split(", ") : []).map((id) => divName[id] || id).join(", ") || "-";
@@ -159,17 +159,29 @@ export default function AttendanceClient({ initialRecords, officers, divisions =
       </div>
 
       {editingRec && (
-        <AttendanceModal rec={editingRec} onClose={() => setEditingRec(null)} />
+        <AttendanceModal rec={editingRec} servers={servers} onClose={() => setEditingRec(null)} />
       )}
       {isAdding && (
-        <AddAttendanceModal officers={officers} onClose={() => setIsAdding(false)} />
+        <AddAttendanceModal officers={officers} servers={servers} onClose={() => setIsAdding(false)} />
       )}
     </div>
   );
 }
 
-function AttendanceModal({ rec, onClose }) {
+function AttendanceModal({ rec, servers = [], onClose }) {
   const [state, formAction, isPending] = useActionState(updateAttendanceAction, null);
+  const availableServers = servers.length > 0 ? servers : [
+    { id: "7glory", name: "7GloryRP" },
+    { id: "moxie", name: "MoxieRP" },
+  ];
+
+  const initialServer =
+    rec.note?.match(/^\[(.*?)\]/)?.[1] ||
+    (rec.note?.toLowerCase().includes("7glory") ? "7GloryRP" : "MoxieRP");
+  const initialNote = rec.note ? rec.note.replace(/^\[.*?\]\s*/, "") : "";
+
+  const [selectedServer, setSelectedServer] = useState(initialServer);
+  const [note, setNote] = useState(initialNote);
 
   useEffect(() => {
     if (state?.success) {
@@ -194,6 +206,33 @@ function AttendanceModal({ rec, onClose }) {
         
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="id" value={rec.id} />
+
+          {/* Opsi Pilih Server */}
+          <div>
+            <label className="label">Pilih Server Roleplay</label>
+            <div className="flex flex-wrap gap-2">
+              {availableServers.map((s) => {
+                const isSel =
+                  selectedServer.toLowerCase() === (s.name || "").toLowerCase();
+                return (
+                  <button
+                    key={s.id || s.name}
+                    type="button"
+                    onClick={() => setSelectedServer(s.name)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-mono transition-all ${
+                      isSel
+                        ? "border-crimson-500 bg-crimson-600/20 text-white font-bold ring-1 ring-crimson-500 shadow-sm"
+                        : "border-line bg-black/40 text-slate-400 hover:text-white hover:border-slate-500"
+                    }`}
+                  >
+                    <Server className="size-3.5 text-crimson-400" />
+                    {s.name}
+                  </button>
+                );
+              })}
+            </div>
+            <input type="hidden" name="server" value={selectedServer} />
+          </div>
           
           <div>
             <label className="label">Check-In</label>
@@ -218,6 +257,18 @@ function AttendanceModal({ rec, onClose }) {
             />
           </div>
 
+          <div>
+            <label className="label">Catatan</label>
+            <input 
+              type="text" 
+              name="note" 
+              className="field" 
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Misal: Lupa check-in / Backdate" 
+            />
+          </div>
+
           {state?.error && <p className="text-sm text-crimson-400">{state.error}</p>}
           
           <div className="pt-2">
@@ -233,10 +284,19 @@ function AttendanceModal({ rec, onClose }) {
   return typeof document !== "undefined" ? createPortal(content, document.body) : null;
 }
 
-function AddAttendanceModal({ officers, onClose }) {
+function AddAttendanceModal({ officers, servers = [], onClose }) {
   const [state, formAction, isPending] = useActionState(createManualAttendanceAction, null);
   const [checkInTime, setCheckInTime] = useState("");
   const [checkOutTime, setCheckOutTime] = useState("");
+
+  const availableServers = servers.length > 0 ? servers : [
+    { id: "7glory", name: "7GloryRP" },
+    { id: "moxie", name: "MoxieRP" },
+  ];
+
+  const [selectedServer, setSelectedServer] = useState(
+    () => availableServers[0]?.name || "7GloryRP"
+  );
 
   useEffect(() => {
     if (state?.success) {
@@ -269,6 +329,33 @@ function AddAttendanceModal({ officers, onClose }) {
                 <option key={o.id} value={o.id}>{o.callsign} - {o.full_name}</option>
               ))}
             </select>
+          </div>
+
+          {/* Opsi Pilih Server Roleplay */}
+          <div>
+            <label className="label">Pilih Server Roleplay</label>
+            <div className="flex flex-wrap gap-2">
+              {availableServers.map((s) => {
+                const isSel =
+                  selectedServer.toLowerCase() === (s.name || "").toLowerCase();
+                return (
+                  <button
+                    key={s.id || s.name}
+                    type="button"
+                    onClick={() => setSelectedServer(s.name)}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg border text-xs font-mono transition-all ${
+                      isSel
+                        ? "border-crimson-500 bg-crimson-600/20 text-white font-bold ring-1 ring-crimson-500 shadow-sm"
+                        : "border-line bg-black/40 text-slate-400 hover:text-white hover:border-slate-500"
+                    }`}
+                  >
+                    <Server className="size-3.5 text-crimson-400" />
+                    {s.name}
+                  </button>
+                );
+              })}
+            </div>
+            <input type="hidden" name="server" value={selectedServer} />
           </div>
 
           <div>
